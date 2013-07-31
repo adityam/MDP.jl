@@ -14,7 +14,7 @@ c = [ 1.0  2.0;
       2.0  1.0;
      10.0 10.0];
 
-model = Model(c,P,:Max);
+model = Model(c,P;objective=:Max);
 
 v = valueIteration(model)
 

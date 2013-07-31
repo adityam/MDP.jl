@@ -11,19 +11,18 @@ module MDP
         transition :: Array{Float64,2}
         objective  :: Function
 
-        function Model(n,m,c,P,sense) 
-            if size(c) != (n,m) || size(P) != (n*m, n)
+        function Model(c,P;objective=:Max) 
+            (n,m) = size(c)
+            if size(P) != (n*m, n)
                 error("Matrix dimensions do not match")
-            elseif sense != :Max && sense != :Min 
+            elseif objective != :Max && objective != :Min 
                 error("Model sense must be :Max or :Min")
             else
-                obj = (sense == :Max)? max : min
+                obj = (objective == :Max)? max : min
                 new (n,m,c,P,obj)
             end
         end
     end
-
-    Model(c,P, sense) = Model(size(c,1),size(c,2),c,P, sense)
 
     function bellmanUpdate(m::Model, valueFunction::Array{Float64,1}; discount=1.0)
         Q = m.perStep + discount *
