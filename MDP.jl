@@ -52,7 +52,7 @@ function valueIteration(m::Model;
         end
     end
     
-    # Renormalize v
+    # Renormalize v -- See Puterman 6.6.12 for details
     v += m.objective(v - v_previous)/scale
 
     return v
