@@ -7,8 +7,8 @@ module MDP
     type Model
         stateSize  :: Int32
         actionSize :: Int32
-        perStep    :: Array{Float64,2}
-        transition :: Array{Float64,2}
+        perStep    :: Matrix{Float64}
+        transition :: Matrix{Float64}
         objective  :: Function
 
         function Model(c,P;objective=:Max) 
@@ -24,7 +24,7 @@ module MDP
         end
     end
 
-    function bellmanUpdate(m::Model, valueFunction::Array{Float64,1}; discount=1.0)
+    function bellmanUpdate(m::Model, valueFunction::Vector{Float64}; discount=1.0)
         Q = m.perStep + discount *
                reshape(m.transition * valueFunction, m.stateSize, m.actionSize);
 
@@ -34,7 +34,7 @@ module MDP
     end
 
     function valueIteration(m::Model;
-                    initial_v  :: Array{Float64,1} = vec(zeros(m.stateSize)),
+                    initial_v  :: Vector{Float64} = vec(zeros(m.stateSize)),
                     discount   :: Float64 = 0.95,
                     iterations :: Int32   = 1_000,
                     tolerance  :: Float64 = 1e-4)
