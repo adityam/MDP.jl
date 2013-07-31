@@ -28,7 +28,8 @@ function bellmanUpdate(m::Model, valueFunction::Array{Float64,1}; discount=1.0)
     return vec(vUpdated)
 end
 
-function valueIteration(m::Model, initial_v::Array{Float64,1};
+function valueIteration(m::Model;
+                initial_v::Array{Float64,1} = vec(zeros(m.stateSize)),
                 discount   :: Float64 = 0.95,
                 iterations :: Int32   = 1_000,
                 tolerance  :: Float64 = 1e-4)
