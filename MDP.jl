@@ -10,7 +10,7 @@ module MDP
         perStep    :: Matrix{Float64}
         transition :: Matrix{Float64}
         objective  :: Function
-        findIndex  :: Function
+        compare    :: Function
 
         function Model(c,P;objective=:Max) 
             (n,m) = size(c)
@@ -19,8 +19,8 @@ module MDP
             elseif objective != :Max && objective != :Min 
                 error("Model sense must be :Max or :Min")
             else
-                obj,ind = (objective == :Max)? (max,indmax) : (min,indmin)
-                new (n,m,c,P,obj,ind)
+                obj,cmp = (objective == :Max)? (max,>) : (min,<)
+                new (n,m,c,P,obj,cmp)
             end
         end
     end
@@ -30,7 +30,7 @@ module MDP
                reshape(m.transition * valueFunction, m.stateSize, m.actionSize);
 
         # vUpdated = m.objective(Q,(),2)
-        vUpdated, gOptimal = withIndex(m.findIndex,Q)
+        vUpdated, gOptimal = withIndex(m.compare,Q)
 
         return vec(vUpdated), vec(gOptimal)
     end
@@ -72,11 +72,31 @@ module MDP
 
     # Julia does not have an in-built function that returns the minimum and the
     # arg min.
-    function withIndex{T}(f::Function, x::Matrix{T})
-        idx = vec(mapslices(f,x,2))
-        val :: Vector{T} = [x[i,idx[i]] for i = 1:size(x,1) ]
+    # function withIndex{T}(f::Function, x::Matrix{T})
+    #     idx = vec(mapslices(f,x,2))
+    #     val :: Vector{T} = [x[i,idx[i]] for i = 1:size(x,1) ]
 
-        return val,idx
+    #     return val,idx
+    # end
+
+    # A more direct implementation
+    function withIndex{T}(compare::Function, x::Matrix{T})
+        (n,m) = size(x)
+        idx::Vector{Int32} = vec(zeros(n,1))
+        val::Vector{T}     = vec(zeros(n,1))
+
+        for i=1:n
+            idx[i], val[i] = 1, x[i,1]
+            for j=2:m
+                if compare(x[i,j],val[i])
+                    idx[i], val[i] = j, x[i,j]
+                end
+            end
+        end
+
+        return val, idx
     end
+
+
 
 end
