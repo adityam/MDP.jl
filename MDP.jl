@@ -48,17 +48,20 @@ module MDP
 
         v,g        = update(initial_v)
         v_previous = copy(v)
+        precision  = Inf32
+        
+        iterationCount  = 0;
+        while (precision > tolerance && iterationCount < iterations)
+            iterationCount += 1
 
-        for i = 1:iterations
             copy!(v_previous, v)
             v,g = update(v_previous)
-            
-            if spanNorm(v, v_previous) < scaledTolerance
-                println("Reached precision ", tolerance, " at iteration ", i)
-                break
-            end
+
+            precision = spanNorm(v, v_previous)
         end
         
+        println("Reached precision ", precision, " at iterationCount ", iterationCount)
+
         # Renormalize v -- See Puterman 6.6.12 for details
         v += m.objective(v - v_previous)/scale
 
