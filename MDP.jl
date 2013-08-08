@@ -60,7 +60,7 @@ module MDP
             precision = spanNorm(v, v_previous)
         end
         
-        println("Reached precision ", precision, " at iterationCount ", iterationCount)
+        @printf("Reached precision %e at iteration %d\n", precision, iterationCount)
 
         # Renormalize v -- See Puterman 6.6.12 for details
         v += m.objective(v - v_previous)/scale
