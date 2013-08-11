@@ -12,15 +12,15 @@ module MDP
         objective  :: Function
         compare    :: Function
 
-        function Model(c,P;objective=:Max) 
-            (n,m) = size(c)
+        function Model(c, P; objective=:Max) 
+            (n, m) = size(c)
             if size(P) != (n*m, n)
                 error("Matrix dimensions do not match")
             elseif objective != :Max && objective != :Min 
                 error("Model sense must be :Max or :Min")
             else
-                obj,cmp = (objective == :Max)? (max,>) : (min,<)
-                new (n,m,c,P,obj,cmp)
+                obj, cmp = (objective == :Max)? (max, >) : (min, <)
+                new (n, m, c, P, obj, cmp)
             end
         end
     end
@@ -29,8 +29,8 @@ module MDP
         Q = m.perStep + discount *
                reshape(m.transition * valueFunction, m.stateSize, m.actionSize);
 
-        # vUpdated = m.objective(Q,(),2)
-        vUpdated, gOptimal = withIndex(m.compare,Q)
+        # vUpdated = m.objective(Q, (), 2)
+        vUpdated, gOptimal = withIndex(m.compare, Q)
 
         return vec(vUpdated), vec(gOptimal)
     end
@@ -46,7 +46,7 @@ module MDP
         
         update(v) = bellmanUpdate(m,v; discount=discount)
 
-        v,g        = update(initial_v)
+        (v, g)     = update(initial_v)
         v_previous = copy(v)
         precision  = Inf32
         
@@ -55,7 +55,7 @@ module MDP
             iterationCount += 1
 
             copy!(v_previous, v)
-            v,g = update(v_previous)
+            (v, g) = update(v_previous)
 
             precision = spanNorm(v, v_previous)
         end
@@ -84,19 +84,19 @@ module MDP
 
     # A more direct implementation
     function withIndex{T}(compare::Function, x::Matrix{T})
-        (n,m) = size(x)
+        (n, m) = size(x)
         idx::Vector{Int32} = vec(zeros(n,1))
         val::Vector{T}     = vec(zeros(n,1))
 
         for i=1:n
             idx[i], val[i] = 1, x[i,1]
             for j=2:m
-                if compare(x[i,j],val[i])
+                if compare(x[i,j], val[i])
                     idx[i], val[i] = j, x[i,j]
                 end
             end
         end
 
-        return val, idx
+        return (val, idx)
     end
 end
