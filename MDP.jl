@@ -2,7 +2,8 @@ module MDP
 
     export Model,
            bellmanUpdate,
-           valueIteration
+           valueIteration,
+           valueIterationBound
 
     type Model
         stateSize  :: Int32
@@ -65,8 +66,29 @@ module MDP
         # Renormalize v -- See Puterman 6.6.12 for details
         v += m.objective(v - v_previous)/scale
 
-        return v,g
+        return (v, g)
     end
+
+    function valueIterationBound(m::Model;
+                          initial_v  :: Vector{Float64} = vec(zeros(m.stateSize)),
+                          discount   :: Float64 = 0.95,
+                          tolerance  :: Float64 = 1e-4)
+
+        scale = (discount < 1)? (1-discount)/discount : 1.0
+        scaledTolerance = scale * tolerance / 2.0
+
+        # See Puterman Thm 6.6.6
+        k = 1 - sum(min(m.transition, (), 1))
+
+        v,_        = bellmanUpdate(m, initial_v; discount=discount)
+        precision  = spanNorm(v, initial_v)
+
+        # See Puterman Prop 6.6.5
+        iterations = log( scaledTolerance/precision ) / log ( k*discount ) 
+
+        return iterations
+    end
+        
 
     function spanNorm (x::Vector, y::Vector)
         z = x - y;
