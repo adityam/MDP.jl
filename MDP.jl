@@ -42,7 +42,7 @@ module MDP
                     tolerance  :: Float64 = 1e-4)
       
         scale = (discount < 1)? (1-discount)/discount : 1.0
-        scaledTolerance = scale * tolerance
+        scaledTolerance = scale * tolerance / 2.0
         
         update(v) = bellmanUpdate(m,v; discount=discount)
 
@@ -51,7 +51,7 @@ module MDP
         precision  = Inf32
         
         iterationCount  = 0;
-        while (precision > tolerance && iterationCount < iterations)
+        while (precision > scaledTolerance && iterationCount < iterations)
             iterationCount += 1
 
             copy!(v_previous, v)
@@ -60,7 +60,7 @@ module MDP
             precision = spanNorm(v, v_previous)
         end
         
-        @printf("Reached precision %e at iteration %d\n", precision, iterationCount)
+        @printf("Reached precision %e at iteration %d\n", 2.0*precision/scale, iterationCount)
 
         # Renormalize v -- See Puterman 6.6.12 for details
         v += m.objective(v - v_previous)/scale
@@ -99,7 +99,4 @@ module MDP
 
         return val, idx
     end
-
-
-
 end
