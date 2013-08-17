@@ -1,11 +1,11 @@
 module MDP
 
-    export Model,
+    export ProbModel,
            bellmanUpdate,
            valueIteration,
            valueIterationBound
 
-    type Model
+    type ProbModel
         stateSize  :: Int32
         actionSize :: Int32
         perStep    :: Matrix{Float64}
@@ -13,7 +13,7 @@ module MDP
         objective  :: Function
         compare    :: Function
 
-        function Model(c, P; objective=:Max) 
+        function ProbModel(c, P; objective=:Max) 
             (n, m) = size(c)
             if size(P) != (n*m, n)
                 error("Matrix dimensions do not match")
@@ -26,7 +26,7 @@ module MDP
         end
     end
 
-    function bellmanUpdate(m::Model, valueFunction::Vector{Float64}; discount=1.0)
+    function bellmanUpdate(m::ProbModel, valueFunction::Vector{Float64}; discount=1.0)
         Q = m.perStep + discount *
                reshape(m.transition * valueFunction, m.stateSize, m.actionSize);
 
@@ -36,7 +36,7 @@ module MDP
         return vec(vUpdated), vec(gOptimal)
     end
 
-    function valueIteration(m::Model;
+    function valueIteration(m::ProbModel;
                     initial_v  :: Vector{Float64} = vec(zeros(m.stateSize)),
                     discount   :: Float64 = 0.95,
                     iterations :: Int32   = 1_000,
@@ -69,7 +69,7 @@ module MDP
         return (v, g)
     end
 
-    function valueIterationBound(m::Model;
+    function valueIterationBound(m::ProbModel;
                           initial_v  :: Vector{Float64} = vec(zeros(m.stateSize)),
                           discount   :: Float64 = 0.95,
                           tolerance  :: Float64 = 1e-4)
@@ -86,7 +86,7 @@ module MDP
         # See Puterman Prop 6.6.5
         iterations = log( scaledTolerance/precision ) / log ( k*discount ) 
 
-        return iterations
+        return int(iterations + 1)
     end
         
 
