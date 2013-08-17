@@ -43,30 +43,13 @@ module MDP
                     tolerance  :: Float64 = 1e-4)
       
         scale = (discount < 1)? (1-discount)/discount : 1.0
-        scaledTolerance = scale * tolerance / 2.0
-        
         update(v) = bellmanUpdate(m,v; discount=discount)
 
-        (v, g)     = update(initial_v)
-        v_previous = copy(v)
-        precision  = Inf32
-        
-        iterationCount  = 0;
-        while (precision > scaledTolerance && iterationCount < iterations)
-            iterationCount += 1
+        return valueUpdateInnerLoop(initial_v, update, m.objective;
+                    iterations = iterations,
+                    scale      = scale,
+                    tolerance  = tolerance)
 
-            copy!(v_previous, v)
-            (v, g) = update(v_previous)
-
-            precision = spanNorm(v, v_previous)
-        end
-        
-        @printf("Reached precision %e at iteration %d\n", 2.0*precision/scale, iterationCount)
-
-        # Renormalize v -- See Puterman 6.6.12 for details
-        v += m.objective(v - v_previous)/scale
-
-        return (v, g)
     end
 
     function valueIterationBound(m::ProbModel;
@@ -89,6 +72,34 @@ module MDP
         return int(iterations + 1)
     end
         
+    function valueUpdateInnerLoop(initial_v, update, objective; 
+                    iterations :: Int32   = 1_000,
+                    scale      :: Float64 = 1e-2,
+                    tolerance  :: Float64 = 1e-4)
+
+        scaledTolerance = scale * tolerance / 2.0
+        
+        (v, g)     = update(initial_v)
+        v_previous = copy(v)
+        precision  = Inf32
+        
+        iterationCount  = 0;
+        while (precision > scaledTolerance && iterationCount < iterations)
+            iterationCount += 1
+
+            copy!(v_previous, v)
+            (v, g) = update(v_previous)
+
+            precision = spanNorm(v, v_previous)
+        end
+        
+        @printf("Reached precision %e at iteration %d\n", 2.0*precision/scale, iterationCount)
+
+        # Renormalize v -- See Puterman 6.6.12 for details
+        v += objective(v - v_previous)/scale
+
+        return (v, g)
+    end
 
     function spanNorm{T <: Real} (x::Array{T}, y::Array{T})
         z = x - y;
