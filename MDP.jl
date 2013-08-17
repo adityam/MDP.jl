@@ -90,7 +90,7 @@ module MDP
     end
         
 
-    function spanNorm (x::Vector, y::Vector)
+    function spanNorm{T <: Real} (x::Array{T}, y::Array{T})
         z = x - y;
         return max(z) - min(z)
     end
@@ -105,7 +105,7 @@ module MDP
     # end
 
     # A more direct implementation
-    function withIndex{T}(compare::Function, x::Matrix{T})
+    function withIndex{T <: Real} (compare::Function, x::Matrix{T})
         (n, m) = size(x)
         idx::Vector{Int32} = vec(zeros(n,1))
         val::Vector{T}     = vec(zeros(n,1))
