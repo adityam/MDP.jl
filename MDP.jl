@@ -1,6 +1,7 @@
 module MDP
 
     export ProbModel,
+           DynamicModel,
            bellmanUpdate,
            valueIteration,
            valueIterationBound
@@ -22,6 +23,20 @@ module MDP
             else
                 obj, cmp = (objective == :Max)? (max, >) : (min, <)
                 new (n, m, c, P, obj, cmp)
+            end
+        end
+    end
+
+    type DynamicModel
+        bellmanUpdate :: Function # (valueFunction; discount=1.0) -> (valueFunction, policy)
+        objective  :: Function
+
+        function DynamicModel(bellmanUpdate; objective=:Max) 
+            if objective != :Max && objective != :Min 
+                error("Model sense must be :Max or :Min")
+            else
+                obj = (objective == :Max)? max : min
+                new (bellmanUpdate, obj)
             end
         end
     end
@@ -50,6 +65,21 @@ module MDP
                     scale      = scale,
                     tolerance  = tolerance)
 
+    end
+
+    function valueIteration(m::DynamicModel, initial_v :: Array{Float64};
+                    discount   :: Float64 = 0.95,
+                    iterations :: Int32   = 1_000,
+                    tolerance  :: Float64 = 1e-4)
+
+        scale = (discount < 1)? (1-discount)/discount : 1.0
+        update(v) = m.bellmanUpdate(v; discount=discount)
+
+        return valueUpdateInnerLoop(initial_v, update, m.objective;
+                    iterations = iterations,
+                    scale      = scale,
+                    tolerance  = tolerance)
+                    
     end
 
     function valueIterationBound(m::ProbModel;
