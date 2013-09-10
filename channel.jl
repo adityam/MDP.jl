@@ -38,11 +38,11 @@ for c = [0.1 0.2 0.3 0.4 0.5]
                     v_next[1, s, ell] = discount * (q * v[1, s, next_ell] + p * v[2, s, next_ell])
                     g_next[1, s, ell] = 1
 
-                    next = [ discount * v[2, s, next_ell] 
+                    next = [ discount * v[2, s, next_ell],
                              xi[ell][s,1]*r - c + discount * ( xi[ell][s,1] * ( q * v[1, 1, 1] + p * v[2, 1, 1])
                                                              + xi[ell][s,2] * v[2, 2, 1]) ] 
-                    g_next[2, s, ell] = indmax(next)
-                    v_next[2, s, ell] = next[ g_next[2, s, ell] ] 
+                    idx = g_next[2, s, ell] = indmax(next)
+                    v_next[2, s, ell] = next[ idx ] 
                 end
             end
 
