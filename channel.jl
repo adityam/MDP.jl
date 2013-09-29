@@ -20,8 +20,8 @@ for c = [0.1 0.2 0.3 0.4 0.5]
 
         function bellmanUpdate(v; discount=1.0)
             # Assume v is 2 x 2 x (L+1)
-            v_next = zero(v)
-            g_next = zeros(size(v))
+            v_next = zeros(Float64, size(v))
+            g_next = zeros(Int32,   size(v))
 
             # v_next(n, s, l)
             # n = 1 == 0 packets in buffer
