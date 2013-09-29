@@ -5,7 +5,8 @@ module MDP
            DynamicModel,
            bellmanUpdate,
            valueIteration,
-           valueIterationBound
+           valueIterationBound,
+           finiteHorizon
 
 
     abstract Model
@@ -130,6 +131,21 @@ module MDP
         return valueIterationBound(m, initial_v;
                     discount   = discount,
                     tolerance  = tolerance)
+    end
+
+    function finiteHorizon(m::Model, final_v :: Array{Float64};
+                           horizon :: Int32 = 10)
+
+        update(v) = m.bellmanUpdate(v; discount=1)
+
+        v = [ zeros(Float64, size(final_v)) for time = 1 : horizon ]
+        g = [ zeros(Int32,   size(final_v)) for time = 1 : horizon ]
+
+        v[horizon] = copy(final_v)
+        for time = horizon-1: -1 : 1
+          (v[time], g[time]) = update(v[time+1])
+        end
+        return (v,g)
     end
         
     function spanNorm{T <: Real} (x::Array{T}, y::Array{T})
