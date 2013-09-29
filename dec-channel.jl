@@ -46,15 +46,16 @@ function bellmanUpdate(v; discount=1.0)
     # ell = last time state of user 2 was observed
     #  s  = last observed state of channel {Idle, Busy}
     #  m  = last time the state of channel was observed
-    for k = 1:L+2
-        next_k = (k < L+1)? k+1 : k
+    for m = 1:M+1
+        next_m = min(m+1, M+1)
 
-        for ell = 1:L+2
-            next_ell = (ell < L+1)? ell+1 : ell
+        for s = 1:2
 
-            for s = 1:2
-                for m = 1:M+1
-                    next_m = min(m+1, M+1)
+            for ell = 1:L+2
+                next_ell = (ell < L+1)? ell+1 : ell
+
+                for k = 1:L+2
+                    next_k = (k < L+1)? k+1 : k
 
                     q00 = discount * v[next_k, next_ell, s, next_m]
 

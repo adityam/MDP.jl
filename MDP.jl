@@ -22,7 +22,7 @@ module MDP
             if size(P) != (n*m, n)
                 error("Matrix dimensions do not match")
             elseif objective != :Max && objective != :Min 
-                error("Model sense must be :Max or :Min")
+                error("Model objective must be :Max or :Min")
             else
                 obj, cmp = (objective == :Max)? (max, >) : (min, <)
 
@@ -49,7 +49,7 @@ module MDP
 
         function DynamicModel(bellmanUpdate; contractionFactor=1.0, objective=:Max) 
             if objective != :Max && objective != :Min 
-                error("Model sense must be :Max or :Min")
+                error("Model objective must be :Max or :Min")
             else
                 obj = (objective == :Max)? max : min
                 new (bellmanUpdate, obj, contractionFactor)
