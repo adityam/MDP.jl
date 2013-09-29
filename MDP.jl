@@ -133,8 +133,21 @@ module MDP
     end
         
     function spanNorm{T <: Real} (x::Array{T}, y::Array{T})
-        z = x - y;
-        return max(z) - min(z)
+        # z = x - y
+        # return max(z) - min(z)
+        # Optimized code. This could have been done using @devec, but
+        # I don't want to add a dependency just for one function.
+        z = vec(x - y)
+        max_z, min_z = -Inf :: T, Inf :: T
+        for elem = z 
+            if max_z < elem
+                max_z = elem
+            end
+            if min_z > elem
+                min_z = elem
+            end
+        end
+        return max_z - min_z
     end
 
     # Julia does not have an in-built function that returns the minimum and the
