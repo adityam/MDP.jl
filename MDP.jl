@@ -25,7 +25,7 @@ module MDP
             elseif objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
-                obj, cmp = (objective == :Max)? (max, >) : (min, <)
+                obj, cmp = (objective == :Max)? (maximum, >) : (minimum, <)
 
                 function bellman(v::Vector{Float64}; discount=1.0)
                     Q = c + discount * reshape(P * v, n, m);
@@ -52,7 +52,7 @@ module MDP
             if objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
-                obj = (objective == :Max)? max : min
+                obj = (objective == :Max)? maximum : minimum
                 new (bellmanUpdate, obj, contractionFactor)
             end
         end
