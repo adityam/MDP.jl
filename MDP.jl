@@ -15,8 +15,8 @@ module MDP
         bellmanUpdate :: Function
         objective  :: Function
         contractionFactor :: Float64
-        stateSize  :: Int32
-        actionSize :: Int32
+        stateSize  :: Int
+        actionSize :: Int
 
         function ProbModel(c, P; objective=:Max) 
             (n, m) = size(c)
@@ -25,7 +25,7 @@ module MDP
             elseif objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
-                obj, cmp = (objective == :Max)? (max, >) : (min, <)
+                obj, cmp = (objective == :Max)? (maximum, >) : (minimum, <)
 
                 function bellman(v::Vector{Float64}; discount=1.0)
                     Q = c + discount * reshape(P * v, n, m);
@@ -52,7 +52,7 @@ module MDP
             if objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
-                obj = (objective == :Max)? max : min
+                obj = (objective == :Max)? maximum : minimum
                 new (bellmanUpdate, obj, contractionFactor)
             end
         end
@@ -61,7 +61,7 @@ module MDP
 
     function valueIteration(m::Model, initial_v :: Array{Float64};
                     discount   :: Float64 = 0.95,
-                    iterations :: Int32   = 1_000,
+                    iterations :: Int   = 1_000,
                     tolerance  :: Float64 = 1e-4)
 
         scale = (discount < 1)? (1-discount)/discount : 1.0
@@ -113,7 +113,7 @@ module MDP
     function valueIteration(m::ProbModel;
                     initial_v  :: Vector{Float64} = vec(zeros(m.stateSize)),
                     discount   :: Float64 = 0.95,
-                    iterations :: Int32   = 1_000,
+                    iterations :: Int   = 1_000,
                     tolerance  :: Float64 = 1e-4)
       
         return valueIteration(m, initial_v;
@@ -134,12 +134,12 @@ module MDP
     end
 
     function finiteHorizon(m::Model, final_v :: Array{Float64};
-                           horizon :: Int32 = 10)
+                           horizon :: Int = 10)
 
         update(v) = m.bellmanUpdate(v; discount=1)
 
         v = [ zeros(Float64, size(final_v)) for time = 1 : horizon ]
-        g = [ zeros(Int32,   size(final_v)) for time = 1 : horizon ]
+        g = [ zeros(Int,   size(final_v)) for time = 1 : horizon ]
 
         v[horizon] = copy(final_v)
         for time = horizon-1: -1 : 1
@@ -178,7 +178,7 @@ module MDP
     # A more direct implementation
     function withIndex{T <: Real} (compare::Function, x::Matrix{T})
         (n, m) = size(x)
-        idx::Vector{Int32} = vec(zeros(n,1))
+        idx::Vector{Int} = vec(zeros(n,1))
         val::Vector{T}     = vec(zeros(n,1))
 
         for i=1:n
