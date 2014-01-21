@@ -1,7 +1,7 @@
 using MDP
 
 # Only needed for rle function
-using Stats
+using StatsBase
 
 L = 50
 M = 30
@@ -34,7 +34,7 @@ z1 = [ probabilityVector(Q1, n)  for n = 1:L+2]
 z2 = [ probabilityVector(Q2, n)  for n = 1:L+2] 
 
 r = 1.0
-c = 0.2
+c = 0.1
 
 function bellmanUpdate(v; discount=1.0)
     # Assume that v is L+2 x L+2 x 2 x M+1
