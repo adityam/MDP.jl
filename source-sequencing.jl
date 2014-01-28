@@ -74,6 +74,7 @@ function bellmanUpdate(v; discount=1.0)
                 for z1 = 1:size1
                     for s2 = 1:size2
                         for s1 = 1:size1
+                            # Choose the option will lower cost
                             if W1[s1, z2, k2] < W2[s2, z1, k1]
                                 v_next[s1, s2, z1, k1, z2, k2] = W1[s1, z2, k2]
                                 g_next[s1, s2, z1, k1, z2, k2] = 1
@@ -92,7 +93,7 @@ function bellmanUpdate(v; discount=1.0)
 
 end
 
-model = DynamicModel(bellmanUpdate; objective=:Max)
+model = DynamicModel(bellmanUpdate; objective=:Min)
 v_initial = zeros(size1, size2, size1, M, size2, M)
 
 @time (v,g) = valueIteration(model, v_initial; discount=0.9)
