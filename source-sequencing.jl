@@ -61,7 +61,7 @@ function bellmanUpdate(v; discount=1.0)
         k1_next = min(k1+1,M)
         for z1 = 1:size1
             for s2 = 1:size2
-                cost_to_go = pi1[k1_next][z1,:] * v[:,:, 1, s2, z1, k1_next] * pi2[1][s2,:]'
+                cost_to_go = pi1[k1_next][z1,:] * v[:,:, z1, k1_next, s2, 1] * pi2[1][s2,:]'
                 W2[s2,z1,k1] = Davg1[k1][z1] + discount * cost_to_go[1,1]
             end
         end
