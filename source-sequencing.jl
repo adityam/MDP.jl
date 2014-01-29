@@ -6,8 +6,8 @@ p2 = 0.1; q2 = 0.1;
 P1 = [1 - p1 p1; q1 1 - q1];
 P2 = [1 - p2 p2; q2 1 - q2];
 
-size1 = size(P1)[1]
-size2 = size(P2)[1]
+size1 = size(P1,1)
+size2 = size(P2,1)
 
 M = 5
 
