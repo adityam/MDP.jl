@@ -9,7 +9,7 @@ P2 = [1 - p2 p2; q2 1 - q2];
 size1 = size(P1,1)
 size2 = size(P2,1)
 
-M = 5
+M = 30
 
 # Reachable states
 pi1 = [ P1^n for n = 1:M ]
@@ -50,7 +50,7 @@ function bellmanUpdate(v; discount=1.0)
                 #     end
                 # end
                 cost_to_go = pi1[1][s1,:] * v[:,:, s1, 1, z2, k2_next] * pi2[k2_next][z2,:]'
-                # In Julia 1x1 matrix is not a scalar
+                # In Julia 1x1 matrix is not a scalar. So we need to index cost_to_go
                 W1[s1,z2,k2] = Davg2[k2][z2] + discount * cost_to_go[1,1]
             end
         end
