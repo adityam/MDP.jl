@@ -1,4 +1,4 @@
-using MDP
+import MDP
 
 p1 = 0.1; q1 = 0.3;
 p2 = 0.1; q2 = 0.1;
@@ -93,7 +93,7 @@ function bellmanUpdate(v; discount=1.0)
 
 end
 
-model = DynamicModel(bellmanUpdate; objective=:Min)
+model = MDP.DynamicModel(bellmanUpdate; objective=:Min)
 v_initial = zeros(size1, size2, size1, M, size2, M)
 
-@time (v,g) = valueIteration(model, v_initial; discount=0.9)
+@time (v,g) = MDP.valueIteration(model, v_initial; discount=0.9)
