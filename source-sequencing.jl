@@ -36,56 +36,39 @@ function bellmanUpdate(v; discount=1.0)
     # If speed becomes an issue, refactor this to reduce the number of loops
     
     # Calculate W1
-    for k2 = 1:M
+    for k2 = 1:M, z2 = 1:size2, s1 = 1:size1
         k2_next = min(k2+1,M)
-        for z2 = 1:size2
-            for s1 = 1:size1
-                # Note that the cost to go is just a quadratic form
-                # cost_to_go = 0 ;
-                # for s2_next = 1:size2
-                #     for s1_next = 1:size1
-                #         cost_to_go += ( pi1[1][s1,s1_next] * pi2[k2_next][z2,s2_next]
-                #                         * v(s1_next, s2_next, s1, 1, z2, k2_next)
-                #                         )
-                #     end
-                # end
-                cost_to_go = pi1[1][s1,:] * v[:,:, s1, 1, z2, k2_next] * pi2[k2_next][z2,:]'
-                # In Julia 1x1 matrix is not a scalar. So we need to index cost_to_go
-                W1[s1,z2,k2] = Davg2[k2][z2] + discount * cost_to_go[1,1]
-            end
-        end
+        # Note that the cost to go is just a quadratic form
+        # cost_to_go = 0 ;
+        # for s2_next = 1:size2
+        #     for s1_next = 1:size1
+        #         cost_to_go += ( pi1[1][s1,s1_next] * pi2[k2_next][z2,s2_next]
+        #                         * v(s1_next, s2_next, s1, 1, z2, k2_next)
+        #                         )
+        #     end
+        # end
+        cost_to_go = pi1[1][s1,:] * v[:,:, s1, 1, z2, k2_next] * pi2[k2_next][z2,:]'
+        # In Julia 1x1 matrix is not a scalar. So we need to index cost_to_go
+        W1[s1,z2,k2] = Davg2[k2][z2] + discount * cost_to_go[1,1]
     end
 
     # Calculate W2
-    for k1 = 1:M
+    for k1 = 1:M, z1 = 1:size1, s2 = 1:size2
         k1_next = min(k1+1,M)
-        for z1 = 1:size1
-            for s2 = 1:size2
-                cost_to_go = pi1[k1_next][z1,:] * v[:,:, z1, k1_next, s2, 1] * pi2[1][s2,:]'
-                W2[s2,z1,k1] = Davg1[k1][z1] + discount * cost_to_go[1,1]
-            end
-        end
+
+        cost_to_go = pi1[k1_next][z1,:] * v[:,:, z1, k1_next, s2, 1] * pi2[1][s2,:]'
+        W2[s2,z1,k1] = Davg1[k1][z1] + discount * cost_to_go[1,1]
     end
 
     # Calculate v_next and g_next
-    for k2 = 1:M
-        for z2 = 1:size2
-            for k1 = 1:M
-                for z1 = 1:size1
-                    for s2 = 1:size2
-                        for s1 = 1:size1
-                            # Choose the option will lower cost
-                            if W1[s1, z2, k2] < W2[s2, z1, k1]
-                                v_next[s1, s2, z1, k1, z2, k2] = W1[s1, z2, k2]
-                                g_next[s1, s2, z1, k1, z2, k2] = 1
-                            else
-                                v_next[s1, s2, z1, k1, z2, k2] = W2[s2, z1, k1]
-                                g_next[s1, s2, z1, k1, z2, k2] = 2
-                            end
-                        end
-                    end
-                end
-            end
+    for k2 = 1:M, z2 = 1:size2, k1 = 1:M, z1 = 1:size1, s2 = 1:size2, s1 = 1:size1
+        # Choose the option will lower cost
+        if W1[s1, z2, k2] < W2[s2, z1, k1]
+            v_next[s1, s2, z1, k1, z2, k2] = W1[s1, z2, k2]
+            g_next[s1, s2, z1, k1, z2, k2] = 1
+        else
+            v_next[s1, s2, z1, k1, z2, k2] = W2[s2, z1, k1]
+            g_next[s1, s2, z1, k1, z2, k2] = 2
         end
     end
 
@@ -97,3 +80,9 @@ model = MDP.DynamicModel(bellmanUpdate; objective=:Min)
 v_initial = zeros(size1, size2, size1, M, size2, M)
 
 @time (v,g) = MDP.valueIteration(model, v_initial; discount=0.9)
+
+z1, z2 = 1, 1
+s1, s2 = 1, 1
+
+policy = reshape(g[s1,s2,z1,:,z2,:], (M,M))
+
