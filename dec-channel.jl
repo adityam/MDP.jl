@@ -46,48 +46,39 @@ function bellmanUpdate(v; discount=1.0)
     # ell = last time state of user 2 was observed
     #  s  = last observed state of channel {Idle, Busy}
     #  m  = last time the state of channel was observed
-    for m = 1:M+1
+    for m = 1:M+1, s = 1:2, ell = 1:L+2, k = 1:L+2
         next_m = min(m+1, M+1)
+        next_ell = (ell < L+1)? ell+1 : ell
+        next_k = (k < L+1)? k+1 : k
 
-        for s = 1:2
+        q00 = discount * v[next_k, next_ell, s, next_m]
 
-            for ell = 1:L+2
-                next_ell = (ell < L+1)? ell+1 : ell
+        q10 = ( z1[k][2] * xi[m][s,1] * r - z1[k][2] * c
+              + discount * ( z1[k][1] * v[1, next_ell, s, next_m]
+                           + z1[k][2] * xi[m][s,1] * v [1, next_ell, 1, 1]
+                           + z1[k][2] * xi[m][s,2] * v [L+2, next_ell, 2, 1]
+                           )
+              )
 
-                for k = 1:L+2
-                    next_k = (k < L+1)? k+1 : k
+        q01 = ( z2[ell][2] * xi[m][s,1] * r - z2[ell][2] * c
+              + discount * ( z2[ell][1] * v[next_k, 1, s, next_m]
+                           + z2[ell][2] * xi[m][s,1] * v [next_k, 1, 1, 1]
+                           + z2[ell][2] * xi[m][s,2] * v [next_k, L+2, 2, 1]
+                           )
+              )
 
-                    q00 = discount * v[next_k, next_ell, s, next_m]
+        q11 = ( ( z1[k][2] * z2[ell][1] + z1[k][1] * z2[ell][2] ) * xi[m][s,1] * r
+              - ( z1[k][2] + z2[ell][2] ) * c
+              + discount * ( z1[k][1] * z2[ell][1] * v[1, 1, s, next_m]
+                           + (z1[k][2] * z2[ell][1] + z1[k][1] * z2[ell][2]) * xi[m][s,1] * v[1, 1, 1, 1]
+                           + z1[k][2] * z2[ell][2] * xi[m][s,1] * v[L+2, L+2, 1, 1]
+                           + (z1[k][2] + z2[ell][2] - z1[k][2]*z2[ell][2]) * xi[m][s,2] * v[L+2, L+2, 2, 1]
+                           )
+              )
 
-                    q10 = ( z1[k][2] * xi[m][s,1] * r - z1[k][2] * c
-                          + discount * ( z1[k][1] * v[1, next_ell, s, next_m]
-                                       + z1[k][2] * xi[m][s,1] * v [1, next_ell, 1, 1]
-                                       + z1[k][2] * xi[m][s,2] * v [L+2, next_ell, 2, 1]
-                                       )
-                          )
-
-                    q01 = ( z2[ell][2] * xi[m][s,1] * r - z2[ell][2] * c
-                          + discount * ( z2[ell][1] * v[next_k, 1, s, next_m]
-                                       + z2[ell][2] * xi[m][s,1] * v [next_k, 1, 1, 1]
-                                       + z2[ell][2] * xi[m][s,2] * v [next_k, L+2, 2, 1]
-                                       )
-                          )
-
-                    q11 = ( ( z1[k][2] * z2[ell][1] + z1[k][1] * z2[ell][2] ) * xi[m][s,1] * r
-                          - ( z1[k][2] + z2[ell][2] ) * c
-                          + discount * ( z1[k][1] * z2[ell][1] * v[1, 1, s, next_m]
-                                       + (z1[k][2] * z2[ell][1] + z1[k][1] * z2[ell][2]) * xi[m][s,1] * v[1, 1, 1, 1]
-                                       + z1[k][2] * z2[ell][2] * xi[m][s,1] * v[L+2, L+2, 1, 1]
-                                       + (z1[k][2] + z2[ell][2] - z1[k][2]*z2[ell][2]) * xi[m][s,2] * v[L+2, L+2, 2, 1]
-                                       )
-                          )
-
-                    next = [q00, q10, q01, q11]
-                    idx = g_next[k, ell, s, m] = indmax(next)
-                    v_next[k, ell, s, m] = next[ idx ]
-                end
-            end
-        end
+        next = [q00, q10, q01, q11]
+        idx = g_next[k, ell, s, m] = indmax(next)
+        v_next[k, ell, s, m] = next[ idx ]
     end
 
     @printf("Debug: v[1,1,1,1] = %0.8f\n", v_next[1,1,1,1])
