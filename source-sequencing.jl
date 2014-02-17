@@ -3,24 +3,24 @@ import MDP
 p1 = 0.1; q1 = 0.3;
 p2 = 0.1; q2 = 0.1;
 
-P1 = [1 - p1 p1; q1 1 - q1];
-P2 = [1 - p2 p2; q2 1 - q2];
+const P1 = [1 - p1 p1; q1 1 - q1];
+const P2 = [1 - p2 p2; q2 1 - q2];
 
-size1 = size(P1,1)
-size2 = size(P2,1)
+const size1 = size(P1,1)
+const size2 = size(P2,1)
 
-M = 30
+const M = 30
 
 # Reachable states
-pi1 = [ P1^n for n = 1:M ]
-pi2 = [ P2^n for n = 1:M ]
+const pi1 = [ (P1^n) for n = 1:M ]
+const pi2 = [ (P2^n) for n = 1:M ]
 
 # Distortion
-d1 = 1 - eye(size1);
-d2 = 1 - eye(size2);
+const d1 = 1 - eye(size1);
+const d2 = 1 - eye(size2);
 
-Davg1 = [ minimum(pi1[n]*d1,1) for n = 1:M ] 
-Davg2 = [ minimum(pi2[n]*d1,1) for n = 1:M ] 
+const Davg1 = [ minimum(pi1[n]*d1,1) for n = 1:M ] 
+const Davg2 = [ minimum(pi2[n]*d1,1) for n = 1:M ] 
 
 function bellmanUpdate(v; discount=1.0)
     # Assume that v is size1 x size2 x size1 x M x size2 x M
