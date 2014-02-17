@@ -3,24 +3,24 @@ using MDP
 # Only needed for rle function
 using StatsBase
 
-L = 50
-M = 30
+const L = 50
+const M = 30
 
 #alpha = [0.75 0.75]
 alpha = [0.75 0.75]
 
-P = [ alpha[1]		1-alpha[1]
-	  1 - alpha[2]  alpha[2]  ]
+const P = [ alpha[1]		1-alpha[1]
+	         1 - alpha[2]  alpha[2]  ]
 
 p1 = p2 = 0.3
 
-Q1 = [ 1 - p1   p1 
-        0        1 ]
+const Q1 = [ 1 - p1   p1 
+              0        1 ]
 
-Q2 = [ 1 - p2   p2 
-        0        1 ]
+const Q2 = [ 1 - p2   p2 
+              0        1 ]
 
-xi = [ P^n for n = 1:M+1] 
+const xi = [ P^n for n = 1:M+1] 
 
 function probabilityVector(Q, n)
     if n < L+2
