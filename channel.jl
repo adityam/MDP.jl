@@ -1,7 +1,7 @@
 using MDP
 
 # Only needed for rle function
-using Stats
+using StatsBase
 
 L = 100
 alpha = [0.75 0.75]
