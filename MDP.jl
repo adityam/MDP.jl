@@ -20,7 +20,8 @@ module MDP
 
         function ProbModel(c, P; objective=:Max) 
             (n, m) = size(c)
-            if size(P) != (n*m, n)
+            P_concatenated = vcat(P...)
+            if size(P_concatenated) != (n*m, n)
                 error("Matrix dimensions do not match")
             elseif objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
@@ -28,7 +29,7 @@ module MDP
                 obj, cmp = (objective == :Max)? (maximum, >) : (minimum, <)
 
                 function bellman(v::Vector{Float64}; discount=1.0)
-                    Q = c + discount * reshape(P * v, n, m);
+                    Q = c + discount * reshape(P_concatenated * v, n, m);
 
                     # vUpdated = m.objective(Q, (), 2)
                     vUpdated, gOptimal = withIndex(cmp, Q)
@@ -37,7 +38,7 @@ module MDP
                 end
 
                 # See Puterman Thm 6.6.6
-                contractionFactor = 1 - sum(minimum(P, 1))
+                contractionFactor = 1 - sum(minimum(P_concatenated, 1))
                 new (bellman, obj, contractionFactor, n, m)
             end
         end
