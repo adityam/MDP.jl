@@ -37,7 +37,7 @@ module MDP
                 end
 
                 # See Puterman Thm 6.6.6
-                contractionFactor = 1 - sum(min(P, (), 1))
+                contractionFactor = 1 - sum(minimum(P, 1))
                 new (bellman, obj, contractionFactor, n, m)
             end
         end
