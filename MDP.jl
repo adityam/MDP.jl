@@ -38,7 +38,13 @@ module MDP
                 end
 
                 # See Puterman Thm 6.6.6
-                contractionFactor = 1 - sum(minimum(P_concatenated, 1))
+                # minimum does not work for a sparse matrix. So, we set the
+                # contractionFactor to 1 for sparse matrices.
+                if issparse(P_concatenated)
+                    contractionFactor = 1
+                else
+                    contractionFactor = 1 - sum(minimum(P_concatenated, 1))
+                end
                 new (bellman, obj, contractionFactor, n, m)
             end
         end
