@@ -1,17 +1,17 @@
 using MDP
 
-const rate        = [0.4 0.7 0.9]
+const rate        = [0.3 0.7 0.9]
 const arrivalRate = 0.5
 
-const serviceCost = [1   3   5]
-const holdingCost = 9
-const dropPenalty = 300
+const serviceCost = [6 10 20]
+const holdingCost = 1
+const dropPenalty = 100_000
 
-const M = 30
+const M = 1000
 const A = size(rate,2)
 
 
-P = [ zeros(Float64, M+1, M+1) for u = 1:A]
+P = [ spzeros(Float64, M+1, M+1) for u = 1:A]
 C = zeros(Float64, M+1, A)
 
 # Initialize cost matrix
@@ -47,4 +47,8 @@ end
 
 model = ProbModel(C, P; objective=:Min)
 
-@time (v,g) = valueIteration(model; discount=0.5)
+@time (v,g) = valueIteration(model; discount=0.9)
+
+using StatsBase
+
+println(rle(g))
