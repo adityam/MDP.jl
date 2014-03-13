@@ -7,7 +7,7 @@ const serviceCost = [6 10 20]
 const holdingCost = 1
 const dropPenalty = 100_000
 
-const M = 1000
+const M = 100
 const A = size(rate,2)
 
 
