@@ -14,7 +14,7 @@ module MDP
     type ProbModel <: Model
         bellmanUpdate :: Function
         objective  :: Function
-        contractionFactor :: Float64
+        contractionFactor
         stateSize  :: Int
         actionSize :: Int
 
@@ -28,7 +28,7 @@ module MDP
             else
                 obj, cmp = (objective == :Max)? (maximum, >) : (minimum, <)
 
-                function bellman(v::Vector{Float64}; discount=1.0)
+                function bellman(v; discount=1)
                     Q = c + discount * reshape(P_concatenated * v, n, m);
 
                     # vUpdated = m.objective(Q, (), 2)
@@ -53,9 +53,9 @@ module MDP
     type DynamicModel <: Model
         bellmanUpdate :: Function # (valueFunction; discount=1.0) -> (valueFunction, policy)
         objective  :: Function
-        contractionFactor :: Float64
+        contractionFactor 
 
-        function DynamicModel(bellmanUpdate; contractionFactor=1.0, objective=:Max) 
+        function DynamicModel(bellmanUpdate; contractionFactor=1, objective=:Max) 
             if objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
@@ -66,19 +66,19 @@ module MDP
 
     end
 
-    function valueIteration(m::Model, initial_v :: Array{Float64};
-                    discount   :: Float64 = 0.95,
-                    iterations :: Int   = 1_000,
-                    tolerance  :: Float64 = 1e-4)
+    function valueIteration(m::Model, initial_v;
+                    discount   = 0.95,
+                    iterations = 1_000,
+                    tolerance  = 1e-4)
 
-        scale = (discount < 1)? (1-discount)/discount : 1.0
-        scaledTolerance = scale * tolerance / 2.0
+        scale = (discount < 1)? (1-discount)/discount : 1
+        scaledTolerance = scale * tolerance / 2
 
         update(v) = m.bellmanUpdate(v; discount=discount)
         
         (v, g)     = update(initial_v)
         v_previous = copy(v)
-        precision  = Inf32
+        precision  = Inf
         
         iterationCount  = 0;
         while (precision > scaledTolerance && iterationCount < iterations)
@@ -90,7 +90,7 @@ module MDP
             precision = spanNorm(v, v_previous)
         end
         
-        @printf("Reached precision %e at iteration %d\n", 2.0*precision/scale, iterationCount)
+        @printf("Reached precision %e at iteration %d\n", 2*precision/scale, iterationCount)
 
         # Renormalize v -- See Puterman 6.6.12 for details
         v += m.objective(v - v_previous)/scale
@@ -98,11 +98,11 @@ module MDP
         return (v, g)
     end
 
-    function valueIterationBound(m::Model, initial_v :: Array{Float64};
-                          discount   :: Float64 = 0.95,
-                          tolerance  :: Float64 = 1e-4)
-        scale = (discount < 1)? (1-discount)/discount : 1.0
-        scaledTolerance = scale * tolerance / 2.0
+    function valueIterationBound(m::Model, initial_v;
+                          discount  = 0.95,
+                          tolerance = 1e-4)
+        scale = (discount < 1)? (1-discount)/discount : 1
+        scaledTolerance = scale * tolerance / 2
 
         v,_        = m.bellmanUpdate(initial_v; discount=discount)
         precision  = spanNorm(v, initial_v)
@@ -118,10 +118,10 @@ module MDP
     # For the probability model, it is possible to automatically initialize 
     # the initial vector
     function valueIteration(m::ProbModel;
-                    initial_v  :: Vector{Float64} = vec(zeros(m.stateSize)),
-                    discount   :: Float64 = 0.95,
-                    iterations :: Int   = 1_000,
-                    tolerance  :: Float64 = 1e-4)
+                    initial_v  = vec(zeros(m.stateSize)),
+                    discount   = 0.95,
+                    iterations = 1_000,
+                    tolerance  = 1e-4)
       
         return valueIteration(m, initial_v;
                     discount   = discount,
@@ -131,21 +131,21 @@ module MDP
 
 
     function valueIterationBound(m::ProbModel;
-                          initial_v  :: Vector{Float64} = vec(zeros(m.stateSize)),
-                          discount   :: Float64 = 0.95,
-                          tolerance  :: Float64 = 1e-4)
+                          initial_v  = vec(zeros(m.stateSize)),
+                          discount   = 0.95,
+                          tolerance  = 1e-4)
 
         return valueIterationBound(m, initial_v;
                     discount   = discount,
                     tolerance  = tolerance)
     end
 
-    function finiteHorizon(m::Model, final_v :: Array{Float64};
+    function finiteHorizon(m::Model, final_v;
                            horizon :: Int = 10)
 
         update(v) = m.bellmanUpdate(v; discount=1)
 
-        v = [ zeros(Float64, size(final_v)) for time = 1 : horizon ]
+        v = [ zero(final_v) for time = 1 : horizon ]
         g = [ zeros(Int,   size(final_v)) for time = 1 : horizon ]
 
         v[horizon] = copy(final_v)
@@ -155,13 +155,13 @@ module MDP
         return (v,g)
     end
         
-    function spanNorm{T <: Real} (x::Array{T}, y::Array{T})
+    function spanNorm (x, y)
         # z = x - y
         # return max(z) - min(z)
         # Optimized code. This could have been done using @devec, but
         # I don't want to add a dependency just for one function.
         z = vec(x - y)
-        max_z, min_z = -Inf :: T, Inf :: T
+        max_z, min_z = -Inf, Inf
         for elem = z 
             if max_z < elem
                 max_z = elem
@@ -183,10 +183,10 @@ module MDP
     # end
 
     # A more direct implementation
-    function withIndex{T <: Real} (compare::Function, x::Matrix{T})
+    function withIndex (compare::Function, x)
         (n, m) = size(x)
-        idx::Vector{Int} = vec(zeros(n,1))
-        val::Vector{T}     = vec(zeros(n,1))
+        idx = vec(zeros(Int, n,1))
+        val = vec(zeros(x,   n,1))
 
         for i=1:n
             idx[i], val[i] = 1, x[i,1]
