@@ -93,7 +93,7 @@ module MDP
         @printf("Reached precision %e at iteration %d\n", 2*precision/scale, iterationCount)
 
         # Renormalize v -- See Puterman 6.6.12 for details
-        v += m.objective(v - v_previous)/scale
+        v .+= m.objective(v - v_previous)/scale
 
         return (v, g)
     end
