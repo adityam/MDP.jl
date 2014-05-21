@@ -34,7 +34,7 @@ z1 = [ probabilityVector(Q1, n)  for n = 1:L+2]
 z2 = [ probabilityVector(Q2, n)  for n = 1:L+2] 
 
 r = 1.0
-c = 0.1
+c = 0.4
 
 function bellmanUpdate(v; discount=1.0)
     # Assume that v is L+2 x L+2 x 2 x M+1
@@ -72,7 +72,9 @@ function bellmanUpdate(v; discount=1.0)
               + discount * ( z1[k][1] * z2[ell][1] * v[1, 1, s, next_m]
                            + (z1[k][2] * z2[ell][1] + z1[k][1] * z2[ell][2]) * xi[m][s,1] * v[1, 1, 1, 1]
                            + z1[k][2] * z2[ell][2] * xi[m][s,1] * v[L+2, L+2, 1, 1]
-                           + (z1[k][2] + z2[ell][2] - z1[k][2]*z2[ell][2]) * xi[m][s,2] * v[L+2, L+2, 2, 1]
+                           + z1[k][2] * z2[ell][1] * xi[m][s,2] * v[L+2, 1, 2, 1]
+                           + z1[k][1] * z2[ell][2] * xi[m][s,2] * v[1, L+2, 2, 1]
+                           + z1[k][2] * z2[ell][2] * xi[m][s,2] * v[L+2, L+2, 2, 1]
                            )
               )
 
