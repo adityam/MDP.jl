@@ -3,7 +3,6 @@ module MDP
     export Model,
            ProbModel,
            DynamicModel,
-           bellmanUpdate,
            valueIteration,
            valueIterationBound,
            finiteHorizon
@@ -145,12 +144,12 @@ module MDP
 
         update(v) = m.bellmanUpdate(v; discount=1)
 
-        v = [ zero(final_v) for time = 1 : horizon ]
-        g = [ zeros(Int,   size(final_v)) for time = 1 : horizon ]
+        v = [ zero(final_v) for stage = 1 : horizon ]
+        g = [ zeros(Int,   size(final_v)) for stage = 1 : horizon ]
 
         v[horizon] = copy(final_v)
-        for time = horizon-1: -1 : 1
-          (v[time], g[time]) = update(v[time+1])
+        for stage = horizon-1: -1 : 1
+          (v[stage], g[stage]) = update(v[stage+1])
         end
         return (v,g)
     end
