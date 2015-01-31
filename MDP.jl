@@ -4,7 +4,6 @@ module MDP
            ProbModel,
            DynamicModel,
            valueIteration,
-           valueIterationBound,
            finiteHorizon
 
 
@@ -72,8 +71,18 @@ module MDP
         
         (v, g)     = update(initial_v)
         v_previous = copy(v)
-        precision  = Inf
+        precision  = spanNorm(v, initial_v)
         
+        # See Puterman Prop 6.6.5
+        # We compare with zero to allow overflow errors when precision is 0.
+        iteration_bound = abs(precision)<4*eps(Float64)? 1 :
+                     int(log( scaledTolerance/precision ) / log ( m.contractionFactor*discount ))
+
+        info("value iteration will converge in at most $iteration_bound iterations")
+        if (iterations <= iteration_bound)
+            warn("Value iteration may not converge. Iterations $iterations less than estimated bound $iteration_bound")
+        end 
+
         iterationCount  = 0;
         while (precision > scaledTolerance && iterationCount < iterations)
             iterationCount += 1
@@ -83,30 +92,18 @@ module MDP
 
             precision = spanNorm(v, v_previous)
         end
-        
-        @printf("Reached precision %e at iteration %d\n", 2*precision/scale, iterationCount)
+
+        if (precision < scaledTolerance)
+            warn(@sprintf("Value iteration did not converge. 
+                 Reached precision %e at iteration %d", 2*precision/scale, iterationCount))
+        else
+            info(@sprintf("Reached precision %e at iteration %d", 2*precision/scale, iterationCount))
+        end
 
         # Renormalize v -- See Puterman 6.6.12 for details
         v .+= m.objective(v - v_previous)/scale
 
         return (v, g)
-    end
-
-    function valueIterationBound(m::Model, initial_v;
-                          discount  = 0.95,
-                          tolerance = 1e-4)
-        scale = (discount < 1)? (1-discount)/discount : 1
-        scaledTolerance = scale * tolerance / 2
-
-        v,_        = m.bellmanUpdate(initial_v; discount=discount)
-        precision  = spanNorm(v, initial_v)
-
-        # See Puterman Prop 6.6.5
-        # We compare with zero to allow overflow errors when precision is 0.
-        iterations = abs(precision)<4*eps(Float64)? 1 :
-                     log( scaledTolerance/precision ) / log ( m.contractionFactor*discount ) 
-
-        return int(iterations + 1)
     end
 
     # For the probability model, it is possible to automatically initialize 
@@ -120,17 +117,6 @@ module MDP
         return valueIteration(m, initial_v;
                     discount   = discount,
                     iterations = iterations,
-                    tolerance  = tolerance)
-    end
-
-
-    function valueIterationBound(m::ProbModel;
-                          initial_v  = vec(zeros(m.stateSize)),
-                          discount   = 0.95,
-                          tolerance  = 1e-4)
-
-        return valueIterationBound(m, initial_v;
-                    discount   = discount,
                     tolerance  = tolerance)
     end
 
