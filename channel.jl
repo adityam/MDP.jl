@@ -52,8 +52,6 @@ for c = [0.1 0.2 0.3 0.4 0.5]
         model = DynamicModel(bellmanUpdate; objective=:Max)
         v_initial = zeros(2,2,L+1)
 
-        # @printf("Should take atmost %d iterations\n", valueIterationBound(model, v_initial; discount=0.9))
-
         (v,g) = valueIteration(model, v_initial; discount=0.9)
 
         g1 = vec(g[2,1,:])
