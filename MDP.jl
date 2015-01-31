@@ -83,7 +83,7 @@ module MDP
             warn("Value iteration may not converge. Iterations $iterations less than estimated bound $iteration_bound")
         end 
 
-        iterationCount  = 0;
+        iterationCount  = 1;
         while (precision > scaledTolerance && iterationCount < iterations)
             iterationCount += 1
 
@@ -93,7 +93,7 @@ module MDP
             precision = spanNorm(v, v_previous)
         end
 
-        if (precision < scaledTolerance)
+        if (precision > scaledTolerance)
             warn(@sprintf("Value iteration did not converge. 
                  Reached precision %e at iteration %d", 2*precision/scale, iterationCount))
         else
