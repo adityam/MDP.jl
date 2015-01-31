@@ -9,11 +9,11 @@ const P2 = [1 - p2 p2; q2 1 - q2];
 const size1 = size(P1,1)
 const size2 = size(P2,1)
 
-const M = 30
+const M = 100
 
 # Reachable states
-const pi1 = [ (P1^n) for n = 1:M ]
-const pi2 = [ (P2^n) for n = 1:M ]
+const pi1 = [ P1^n for n = 1:M ]
+const pi2 = [ P2^n for n = 1:M ]
 
 # Distortion
 const d1 = 1 - eye(size1);
@@ -63,13 +63,11 @@ function bellmanUpdate(v; discount=1.0)
     # Calculate v_next and g_next
     for k2 = 1:M, z2 = 1:size2, k1 = 1:M, z1 = 1:size1, s2 = 1:size2, s1 = 1:size1
         # Choose the option will lower cost
-        if W1[s1, z2, k2] < W2[s2, z1, k1]
-            v_next[s1, s2, z1, k1, z2, k2] = W1[s1, z2, k2]
-            g_next[s1, s2, z1, k1, z2, k2] = 1
-        else
-            v_next[s1, s2, z1, k1, z2, k2] = W2[s2, z1, k1]
-            g_next[s1, s2, z1, k1, z2, k2] = 2
-        end
+        w1  = W1[s1, z2, k2]
+        w2  = W2[s2, z1, k1]
+
+        index = (s1, s2, z1, k1, z2, k2)
+        (v_next[index...], g_next[index...]) = (w1 < w2)? (w1, 1) : (w2, 2)
     end
 
     return (v_next, g_next)
@@ -81,8 +79,10 @@ v_initial = zeros(size1, size2, size1, M, size2, M)
 
 @time (v,g) = MDP.valueIteration(model, v_initial; discount=0.9)
 
-z1, z2 = 1, 1
-s1, s2 = 1, 1
+println(v[1])
 
-policy = reshape(g[s1,s2,z1,:,z2,:], (M,M))
+# z1, z2 = 1, 1
+# s1, s2 = 1, 1
+# 
+# policy = reshape(g[s1,s2,z1,:,z2,:], (M,M))
 
