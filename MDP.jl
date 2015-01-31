@@ -109,7 +109,7 @@ module MDP
     # For the probability model, it is possible to automatically initialize 
     # the initial vector
     function valueIteration(m::ProbModel;
-                    initial_v  = vec(zeros(m.stateSize)),
+                    initial_v  = zeros(m.stateSize),
                     discount   = 0.95,
                     iterations = 1_000,
                     tolerance  = 1e-4)
