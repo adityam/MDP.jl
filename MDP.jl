@@ -163,10 +163,10 @@ module MDP
     # end
 
     # A more direct implementation
-    function withIndex (compare::Function, x)
+    function withIndex{T,N} (compare::Function, x::AbstractArray{T,N})
         (n, m) = size(x)
-        idx = vec(zeros(Int, n,1))
-        val = vec(zeros(x,   n,1))
+        idx = vec(zeros(Int, n, 1))
+        val = vec(zeros(T,   n, 1))
 
         for i=1:n
             idx[i], val[i] = 1, x[i,1]
