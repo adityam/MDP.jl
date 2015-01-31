@@ -32,7 +32,7 @@ module MDP
                     # vUpdated = m.objective(Q, (), 2)
                     vUpdated, gOptimal = withIndex(cmp, Q)
 
-                    return vec(vUpdated), vec(gOptimal)
+                    return vUpdated, gOptimal
                 end
 
                 # See Puterman Thm 6.6.6
@@ -163,10 +163,10 @@ module MDP
     # end
 
     # A more direct implementation
-    function withIndex{T,N} (compare::Function, x::AbstractArray{T,N})
+    function withIndex{T} (compare::Function, x::AbstractArray{T,2})
         (n, m) = size(x)
-        idx = vec(zeros(Int, n, 1))
-        val = vec(zeros(T,   n, 1))
+        idx = zeros(Int, n)
+        val = zeros(T,   n)
 
         for i=1:n
             idx[i], val[i] = 1, x[i,1]
