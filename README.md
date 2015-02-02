@@ -123,7 +123,7 @@ Here is the full example:
 which outputs
 
 
-INFO: value iteration will converge in at most 20 iterations
-INFO: Reached precision 5.742009e-05 at iteration 18
-[1,1]
-[-8.571401228528563,-19.999971289954992]
+    INFO: value iteration will converge in at most 20 iterations
+    INFO: Reached precision 5.742009e-05 at iteration 18
+    [1,1]
+    [-8.571401228528563,-19.999971289954992]
