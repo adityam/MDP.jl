@@ -65,11 +65,11 @@ This model is specified as follows:
 
 - Specify the transition matrix as a list `{ P( . | ., 1), P( . | ., 2) }`.
 
+        P = Matrix[ [ 0.5  0.5 
+                      0.0  1.0 ],
+                    [ 0.0  1.0
+                      0.5  0.5 ] ]
 
-        P = { [ 0.5  0.5 
-                0.0  1.0 ],
-              [ 0.0  1.0
-                0.5  0.5 ] }
 
 - Specify an MDP model
 
@@ -94,6 +94,9 @@ The optimal arguments for `valueIteration` are
 
 * `tolerance` (default `1e-4`): Stop the iteration when sup-norm of `v - v_opt`
   is less than `tolerance`, where `v_opt` is the optimal solution.
+
+      To speed up convergence, we use span seminorm and do a correction before
+      returning the value function. See Puterman Sec 6.6 for details. 
     
 * `intial_v` (default, an all zeros-vector). 
 
@@ -101,10 +104,10 @@ Here is the full example:
 
     using MDP
 
-    P = { [ 0.5  0.5 
-            0.0  1.0 ],
-          [ 0.0  1.0
-            0.5  0.5 ] }
+    P = Matrix[ [ 0.5  0.5 
+                  0.0  1.0 ],
+                [ 0.0  1.0
+                  0.5  0.5 ] ]
 
     r = [ 5  10
          -1  -Inf ]
@@ -113,13 +116,14 @@ Here is the full example:
 
     (v,g) = valueIteration(model; discount=0.95)
 
-    print(v)
+    println(g)
+    println(v)
 
 
 which outputs
 
 
-    INFO: value iteration will converge in at most 20 iterations
-    INFO: Reached precision 5.742009e-05 at iteration 18
-    [-8.571401228528563,-19.999971289954992]
-      
+INFO: value iteration will converge in at most 20 iterations
+INFO: Reached precision 5.742009e-05 at iteration 18
+[1,1]
+[-8.571401228528563,-19.999971289954992]
