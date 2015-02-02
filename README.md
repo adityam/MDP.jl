@@ -1,7 +1,7 @@
 # MDP
 
 [![Build Status](https://travis-ci.org/adityam/MDP.jl.svg?branch=master)](https://travis-ci.org/adityam/MDP.jl)
-[![Coverage Status](https://coveralls.io/repos/adiyams/MDP.jl/badge.png?branch=master)](https://coveralls.io/r/adityam/MDP.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/adityam/MDP.jl/badge.svg?branch=master)](https://coveralls.io/r/adityam/MDP.jl?branch=master)
 
 The MDP package implements algorithms for Markov decision processes (MDP).
 
