@@ -21,6 +21,5 @@ tolerance_01 = 1e-3
 v_opt_01 = [ (5.0 - 5.5 * discount_01)/( (1.0 - 0.5 * discount_01) * (1.0 - discount_01) ), 
             -1.0 / ( 1 - discount_01 ) ]
 
-@test_approx_eq_eps v_01[1] v_opt_01[1] tolerance_01
-@test_approx_eq_eps v_01[2] v_opt_01[2] tolerance_01
+@test_approx_eq_eps v_01 v_opt_01 tolerance_01
 
