@@ -4,13 +4,13 @@
 
 The MDP package implements algorithms for Markov decision processes (MDP).
 
-# Installation
+## Installation
 
 MDP can be installed through Julia package manager 
 
     julia> Pkg.clone("https://github.com/adityam/MDP.jl")
 
-# Supported algorithms
+## Supported algorithms
 
 The MDP package currently implements the following algorithms
 
@@ -21,7 +21,7 @@ The MDP package currently implements the following algorithms
 Other algorithms related to MDPs will be implemented as time permits. Pull
 requests welcome.
 
-# Specifying a model
+## Specifying a model
 
 There are two ways to specify the MDP model:
 
@@ -32,7 +32,7 @@ There are two ways to specify the MDP model:
 
 Perhaps the easiest way to understand these is by means of examples. 
 
-## Specifying a model: probabilistic method
+### Specifying a model: probabilistic method
 
 _This example is taken from Puterman, "Markov Decision Processes", Wiley 2005
 (Chapter 3.1)_
