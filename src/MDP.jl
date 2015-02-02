@@ -73,15 +73,19 @@ module MDP
         v_previous = copy(v)
         precision  = spanNorm(v, initial_v)
         
-        # See Puterman Prop 6.6.5
-        # We compare with zero to allow overflow errors when precision is 0.
-        iteration_bound = abs(precision)<4*eps(Float64)? 1 :
-                     int(log( scaledTolerance/precision ) / log ( m.contractionFactor*discount ))
+        if abs( 1 - m.contractionFactor * discount ) < 4*eps 
+            warn("Contraction factor to small to guarantee convergece. Value iteration may not converge.")
+        else
+            # See Puterman Prop 6.6.5
+            # We compare with zero to allow overflow errors when precision is 0.
+            iteration_bound = abs(precision)<4*eps(Float64)? 1 :
+                         int(log( scaledTolerance/precision ) / log ( m.contractionFactor*discount ))
 
-        info("value iteration will converge in at most $iteration_bound iterations")
-        if (iterations <= iteration_bound)
-            warn("Value iteration may not converge. Iterations $iterations less than estimated bound $iteration_bound")
-        end 
+            info("value iteration will converge in at most $iteration_bound iterations")
+            if (iterations <= iteration_bound)
+                warn("Value iteration may not converge. Iterations $iterations less than estimated bound $iteration_bound")
+            end 
+        end
 
         iterationCount  = 1;
         while (precision > scaledTolerance && iterationCount < iterations)
@@ -142,7 +146,7 @@ module MDP
         # I don't want to add a dependency just for one function.
         z = vec(x - y)
         max_z, min_z = -Inf, Inf
-        for elem = z 
+        for elem in z 
             if max_z < elem
                 max_z = elem
             end
