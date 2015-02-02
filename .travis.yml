@@ -5,4 +5,4 @@ julia:
   - nightly
 
 script:
- - julia -e 'Pkg.init(); Pkg.clone(pwd()); Pkg.test("MDPs", coverage=true)'
+  - julia -e 'Pkg.init(); Pkg.clone("https://github.com/adityam/MDP.jl"); Pkg.test("MDP", coverage=true)'
