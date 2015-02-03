@@ -73,7 +73,7 @@ module MDP
         v_previous = copy(v)
         precision  = spanNorm(v, initial_v)
         
-        if abs( 1 - m.contractionFactor * discount ) < 4*eps 
+        if abs( 1 - m.contractionFactor * discount ) < 4*eps(Float64)
             warn("Contraction factor to small to guarantee convergece. Value iteration may not converge.")
         else
             # See Puterman Prop 6.6.5
