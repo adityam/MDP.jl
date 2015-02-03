@@ -71,6 +71,12 @@ This model is specified as follows:
                     [ 0.0  1.0
                       0.5  0.5 ] ]
 
+    This list may also be specified as a sparse matrix (this can lead to
+    considerable speedup when the transition matrices are sparse)
+
+        P = SparseMatrixCSC[sparse([0.5 0.5; 0.0 1.0]),
+                            sparse([0.0 1.0; 0.5 0.5]) ]
+
 
 - Specify an MDP model
 
