@@ -84,7 +84,7 @@ module MDP
         precision  = spanNorm(v, initial_v)
         
         if abs( 1 - m.contractionFactor * discount ) < 4*eps(discount)
-            warn("Contraction factor to small to guarantee convergece. Value iteration may not converge.")
+            warn("Contraction factor too small to guarantee convergece. Value iteration may not converge.")
         else
             # See Puterman Prop 6.6.5
             # We compare with zero to allow overflow errors when precision is 0.
