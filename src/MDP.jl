@@ -19,8 +19,12 @@ module MDP
         function ProbModel{T} (c :: Matrix{T}, P; objective=:Max) 
             (n, m) = size(c)
 
+            if length(P) != m
+                error("Number of transition matrices does not match number of actions.")
+            end
+
             o = ones(T, n)
-            is_row_stochastic(Pi) = dot( abs(Pi * o - o), o ) < 4 * eps(T) 
+            is_row_stochastic(Pi) = size(Pi) != (n,n) || dot( abs(Pi * o - o), o ) < 4 * eps(T) 
 
             for Pi in P
                 if ( ! is_row_stochastic(Pi) )
