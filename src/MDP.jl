@@ -16,26 +16,27 @@ module MDP
         stateSize  :: Int
         actionSize :: Int
 
-        function ProbModel{T} (c :: Matrix{T}, P; objective=:Max) 
+        function ProbModel (c, P; objective=:Max) 
             (n, m) = size(c)
 
             if length(P) != m
                 error("Number of transition matrices does not match number of actions.")
             end
 
-            o = ones(T, n)
-            is_row_stochastic(Pi) = size(Pi) != (n,n) || dot( abs(Pi * o - o), o ) < 4 * eps(T) 
+            P_concatenated = vcat(P...)
+            if size(P_concatenated) != (n*m, n)
+                error("Size of transition and reward matrices are inconsistent")
+            end
 
+            o = ones(typeof(P[1][1,1]), n)
+            is_row_stochastic(Pi) = size(Pi) == (n,n) && dot( abs(Pi * o - o), o) < 4 * eps(Float64) 
             for Pi in P
                 if ( ! is_row_stochastic(Pi) )
                     error("Transition matrix is not row stochastic.")
                 end
             end
 
-            P_concatenated = vcat(P...)
-            if size(P_concatenated) != (n*m, n)
-                error("Matrix dimensions do not match")
-            elseif objective != :Max && objective != :Min 
+            if objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
                 obj, cmp = (objective == :Max)? (maximum, >) : (minimum, <)
@@ -87,7 +88,7 @@ module MDP
         v_previous = copy(v)
         precision  = spanNorm(v, initial_v)
         
-        if abs( 1 - m.contractionFactor * discount ) < 4*eps(discount)
+        if abs( 1 - m.contractionFactor * discount ) < 4*eps(Float64)
             warn("Contraction factor too small to guarantee convergece. Value iteration may not converge.")
         else
             # See Puterman Prop 6.6.5
