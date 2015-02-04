@@ -12,7 +12,7 @@ module MDP
     type ProbModel <: Model
         bellmanUpdate :: Function
         objective  :: Function
-        contractionFactor
+        contractionFactor :: Float
         stateSize  :: Int
         actionSize :: Int
 
@@ -38,13 +38,13 @@ module MDP
             if objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
-                obj, cmp = (objective == :Max)? (maximum, >) : (minimum, <)
+                obj, compare = (objective == :Max)? (maximum, >) : (minimum, <)
 
                 function bellman(v; discount=1)
                     Q = c + discount * reshape(P_concatenated * v, n, m);
 
                     # vUpdated = m.objective(Q, (), 2)
-                    vUpdated, gOptimal = withIndex(cmp, Q)
+                    vUpdated, gOptimal = withIndex(compare, Q)
 
                     return vUpdated, gOptimal
                 end
@@ -60,7 +60,7 @@ module MDP
     type DynamicModel <: Model
         bellmanUpdate :: Function # (valueFunction; discount=1.0) -> (valueFunction, policy)
         objective  :: Function
-        contractionFactor 
+        contractionFactor :: Float
 
         function DynamicModel(bellmanUpdate; contractionFactor=1, objective=:Max) 
             if objective != :Max && objective != :Min 
@@ -78,22 +78,22 @@ module MDP
                     iterations = 1_000,
                     tolerance  = 1e-4)
 
-        scale = (discount < 1)? (1-discount)/discount : 1
-        scaledTolerance = scale * tolerance / 2
+        scaledDiscount  = (discount < 1)? (1-discount)/discount : 1
+        scaledTolerance = scaledDiscount * tolerance / 2
 
         update(v) = m.bellmanUpdate(v; discount=discount)
         
-        (v, g)     = update(initial_v)
-        v_previous = copy(v)
-        precision  = spanNorm(v, initial_v)
+        (v, g)      = update(initial_v)
+        v_previous  = copy(v)
+        v_precision = spanNorm(v, initial_v)
         
         if abs( 1 - m.contractionFactor * discount ) < 4*eps(Float64)
             warn("Contraction factor too small to guarantee convergece. Value iteration may not converge.")
         else
             # See Puterman Prop 6.6.5
-            # We compare with zero to allow overflow errors when precision is 0.
-            iteration_bound = abs(precision)<4*eps(Float64)? 1 :
-                         int(log( scaledTolerance/precision ) / log ( m.contractionFactor*discount ))
+            # We compare with zero to allow overflow errors when v_precision is 0.
+            iteration_bound = abs(v_precision)<4*eps(Float64)? 1 :
+                         int(log( scaledTolerance/v_precision ) / log ( m.contractionFactor*discount ))
 
             info("value iteration will converge in at most $iteration_bound iterations")
             if (iterations <= iteration_bound)
@@ -102,24 +102,24 @@ module MDP
         end
 
         iterationCount  = 1;
-        while (precision > scaledTolerance && iterationCount < iterations)
+        while (v_precision > scaledTolerance && iterationCount < iterations)
             iterationCount += 1
 
             copy!(v_previous, v)
             (v, g) = update(v_previous)
 
-            precision = spanNorm(v, v_previous)
+            v_precision = spanNorm(v, v_previous)
         end
 
-        if (precision > scaledTolerance)
+        if (v_precision > scaledTolerance)
             warn(@sprintf("Value iteration did not converge. 
-                 Reached precision %e at iteration %d", 2*precision/scale, iterationCount))
+                 Reached precision %e at iteration %d", 2*v_precision/scaledDiscount, iterationCount))
         else
-            info(@sprintf("Reached precision %e at iteration %d", 2*precision/scale, iterationCount))
+            info(@sprintf("Reached precision %e at iteration %d", 2*v_precision/scaledDiscount, iterationCount))
         end
 
         # Renormalize v -- See Puterman 6.6.12 for details
-        v .+= m.objective(v - v_previous)/scale
+        v .+= m.objective(v - v_previous)/scaledDiscount
 
         return (v, g)
     end
@@ -147,7 +147,7 @@ module MDP
         g = [ zeros(Int,   size(final_v)) for stage = 1 : horizon ]
 
         v[horizon] = copy(final_v)
-        for stage = horizon-1: -1 : 1
+        for stage in horizon-1: -1 : 1
           (v[stage], g[stage]) = update(v[stage+1])
         end
         return (v,g)
