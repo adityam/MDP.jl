@@ -12,7 +12,7 @@ module MDP
     type ProbModel <: Model
         bellmanUpdate :: Function
         objective  :: Function
-        contractionFactor :: Float
+        contractionFactor :: Float64
         stateSize  :: Int
         actionSize :: Int
 
@@ -60,7 +60,7 @@ module MDP
     type DynamicModel <: Model
         bellmanUpdate :: Function # (valueFunction; discount=1.0) -> (valueFunction, policy)
         objective  :: Function
-        contractionFactor :: Float
+        contractionFactor :: Float64
 
         function DynamicModel(bellmanUpdate; contractionFactor=1, objective=:Max) 
             if objective != :Max && objective != :Min 
