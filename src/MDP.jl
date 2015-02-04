@@ -28,7 +28,7 @@ module MDP
                 error("Size of transition and reward matrices are inconsistent")
             end
 
-            is_row_stochastic(Pi) = size(Pi) == (n,n) && sum( sum(Pi, 2) - 1 ) < 4 * eps(Float64) 
+            is_row_stochastic(Pi) = size(Pi) == (n,n) && abs(sum( sum(Pi, 2) - 1)) < 4 * eps(Float64) 
             for Pi in P
                 if ( ! is_row_stochastic(Pi) )
                     error("Transition matrix is not row stochastic.")
