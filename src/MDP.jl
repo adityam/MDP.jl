@@ -92,8 +92,7 @@ module MDP
         else
             # See Puterman Prop 6.6.5
             # We compare with zero to allow overflow errors when v_precision is 0.
-            iteration_bound = abs(v_precision)<4*eps(Float64)? 1 :
-                         int(log( scaledTolerance/v_precision ) / log ( m.contractionFactor*discount ))
+            iteration_bound = abs(v_precision)<4*eps(Float64)? 1 : (log( scaledTolerance/v_precision ) / log ( m.contractionFactor*discount ))
 
             info("value iteration will converge in at most $iteration_bound iterations")
             if (iterations <= iteration_bound)
