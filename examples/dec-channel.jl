@@ -55,15 +55,15 @@ function bellmanUpdate(v; discount=1.0)
 
         q10 = ( z1[k][2] * xi[m][s,1] * r - z1[k][2] * c
               + discount * ( z1[k][1] * v[1, next_ell, s, next_m]
-                           + z1[k][2] * xi[m][s,1] * v [1, next_ell, 1, 1]
-                           + z1[k][2] * xi[m][s,2] * v [L+2, next_ell, 2, 1]
+                           + z1[k][2] * xi[m][s,1] * v[1, next_ell, 1, 1]
+                           + z1[k][2] * xi[m][s,2] * v[L+2, next_ell, 2, 1]
                            )
               )
 
         q01 = ( z2[ell][2] * xi[m][s,1] * r - z2[ell][2] * c
               + discount * ( z2[ell][1] * v[next_k, 1, s, next_m]
-                           + z2[ell][2] * xi[m][s,1] * v [next_k, 1, 1, 1]
-                           + z2[ell][2] * xi[m][s,2] * v [next_k, L+2, 2, 1]
+                           + z2[ell][2] * xi[m][s,1] * v[next_k, 1, 1, 1]
+                           + z2[ell][2] * xi[m][s,2] * v[next_k, L+2, 2, 1]
                            )
               )
 

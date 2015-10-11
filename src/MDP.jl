@@ -16,7 +16,7 @@ module MDP
         stateSize  :: Int
         actionSize :: Int
 
-        function ProbModel (c, P; objective=:Max) 
+        function ProbModel(c, P; objective=:Max) 
             (n, m) = size(c)
 
             if length(P) != m
@@ -54,7 +54,7 @@ module MDP
                 # See Puterman Thm 6.6.6
                 contractionFactor = 1 - sum(minimum(P_concatenated, 1))
 
-                new (bellman, obj, contractionFactor, n, m)
+                new(bellman, obj, contractionFactor, n, m)
             end
         end
     end
@@ -69,7 +69,7 @@ module MDP
                 error("Model objective must be :Max or :Min")
             else
                 obj = (objective == :Max)? maximum : minimum
-                new (bellmanUpdate, obj, contractionFactor)
+                new(bellmanUpdate, obj, contractionFactor)
             end
         end
 
@@ -94,7 +94,12 @@ module MDP
         else
             # See Puterman Prop 6.6.5
             # We compare with zero to allow overflow errors when v_precision is 0.
-            iteration_bound = abs(v_precision)<4*eps(Float64)? 1 : (log( scaledTolerance/v_precision ) / log ( m.contractionFactor*discount ))
+            if abs(v_precision) < 4*eps(Float64)
+                iteration_bound = 1
+            else
+                bound = log( scaledTolerance/v_precision ) / log( m.contractionFactor*discount )
+                iteration_bound = round(Int, bound)
+            end
 
             info("value iteration will converge in at most $iteration_bound iterations")
             if (iterations <= iteration_bound)
@@ -154,7 +159,7 @@ module MDP
         return (v,g)
     end
         
-    function spanNorm (x, y)
+    function spanNorm(x, y)
         # z = x - y
         # return max(z) - min(z)
         # Optimized code. This could have been done using @devec, but
@@ -182,7 +187,7 @@ module MDP
     # end
 
     # A more direct implementation
-    function withIndex{T} (compare::Function, x::AbstractArray{T,2})
+    function withIndex{T}(compare::Function, x::AbstractArray{T,2})
         (n, m) = size(x)
         idx = zeros(Int, n)
         val = zeros(T,   n)
