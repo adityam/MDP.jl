@@ -97,8 +97,7 @@ module MDP
             if abs(v_precision) < 4*eps(Float64)
                 iteration_bound = 1
             else
-                bound = log( scaledTolerance/v_precision ) / log( m.contractionFactor*discount )
-                iteration_bound = round(Int, bound)
+                iteration_bound = floor(log( scaledTolerance/v_precision ) / log( m.contractionFactor*discount ))
             end
 
             info("value iteration will converge in at most $iteration_bound iterations")
