@@ -19,6 +19,10 @@ The MDP package currently implements the following algorithms
 
     - Value iteration 
 
+* **Finite horizon setup**
+
+    - Standard dynamic program
+
 Other algorithms related to MDPs will be implemented as time permits. Pull
 requests welcome.
 

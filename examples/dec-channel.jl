@@ -36,10 +36,8 @@ z2 = [ probabilityVector(Q2, n)  for n = 1:L+2]
 r = 1.0
 c = 0.4
 
-function bellmanUpdate(v; discount=1.0)
+function bellmanUpdate!(v_next, g_next, v; discount=1.0)
     # Assume that v is L+2 x L+2 x 2 x M+1
-    v_next = zeros(size(v)) :: Array{Float64}
-    g_next = zeros(size(v))
 
     # v_next(k, ell, s, m)
     # k   = last time state of user 1 was observed
@@ -87,7 +85,7 @@ function bellmanUpdate(v; discount=1.0)
     return (v_next, g_next)
 end
 
-model = DynamicModel(bellmanUpdate; objective=:Max)
+model = DynamicModel(bellmanUpdate!; objective=:Max)
 v_initial = zeros(L+2, L+2, 2, M+1)
 
 @time (v,g) = valueIteration(model, v_initial; discount=0.9)

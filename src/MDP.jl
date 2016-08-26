@@ -10,7 +10,7 @@ module MDP
     abstract Model
 
     type ProbModel <: Model
-        bellmanUpdate :: Function
+        bellmanUpdate! :: Function
         objective  :: Function
         contractionFactor :: Float64
         stateSize  :: Int
@@ -44,34 +44,32 @@ module MDP
             else
                 obj, compare = (objective == :Max)? (maximum, >) : (minimum, <)
 
-                function bellman(v; discount=1)
+                function bellman!(vUpdated, gUpdated, v; discount=1)
                     Q = c + discount * reshape(P_concatenated * v, n, m);
 
                     # vUpdated = m.objective(Q, (), 2)
-                    vUpdated, gOptimal = withIndex(compare, Q)
-
-                    return vUpdated, gOptimal
+                    withIndex!(vUpdated, gUpdated, compare, Q)
                 end
 
                 # See Puterman Thm 6.6.6
                 contractionFactor = 1 - sum(minimum(P_concatenated, 1))
 
-                new(bellman, obj, contractionFactor, n, m)
+                new(bellman!, obj, contractionFactor, n, m)
             end
         end
     end
 
     type DynamicModel <: Model
-        bellmanUpdate :: Function # (valueFunction; discount=1.0) -> (valueFunction, policy)
+        bellmanUpdate! :: Function # (valueFunction; discount=1.0) -> (valueFunction, policy)
         objective  :: Function
         contractionFactor :: Float64
 
-        function DynamicModel(bellmanUpdate; contractionFactor=1, objective=:Max) 
+        function DynamicModel(bellmanUpdate!; contractionFactor=1, objective=:Max) 
             if objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
                 obj = (objective == :Max)? maximum : minimum
-                new(bellmanUpdate, obj, contractionFactor)
+                new(bellmanUpdate!, obj, contractionFactor)
             end
         end
 
@@ -85,10 +83,15 @@ module MDP
         scaledDiscount  = (discount < 1)? (1-discount)/discount : 1
         scaledTolerance = scaledDiscount * tolerance / 2
 
-        update(v) = m.bellmanUpdate(v; discount=discount)
+        update!(vUpdated, gUpdated, v) = m.bellmanUpdate!(vUpdated, gUpdated, v; discount=discount)
+
+        v_previous = copy(initial_v)
+        v          = copy(initial_v)
+        g          = zeros(Int, size(v))
         
-        (v, g)      = update(initial_v)
-        v_previous  = copy(v)
+        update!(v, g, initial_v)
+        copy!(v_previous, v)
+
         v_precision = spanNorm(v, initial_v)
         
         if abs( 1 - m.contractionFactor * discount ) < 4*eps(Float64)
@@ -113,7 +116,7 @@ module MDP
             iterationCount += 1
 
             copy!(v_previous, v)
-            (v, g) = update(v_previous)
+            update!(v, g, v_previous)
 
             v_precision = spanNorm(v, v_previous)
         end
@@ -148,14 +151,14 @@ module MDP
     function finiteHorizon(m::Model, final_v;
                            horizon :: Int = 10)
 
-        update(v) = m.bellmanUpdate(v; discount=1)
+        update!(vUpdated, gUpdated, v) = m.bellmanUpdate!(vUpdated, gUpdated, v; discount=discount)
 
         v = [ zero(final_v) for stage = 1 : horizon ]
         g = [ zeros(Int,   size(final_v)) for stage = 1 : horizon ]
 
         v[horizon] = copy(final_v)
         for stage in horizon-1: -1 : 1
-          (v[stage], g[stage]) = update(v[stage+1])
+          update!(v[stage], g[stage], v[stage+1])
         end
         return (v,g)
     end
@@ -188,10 +191,8 @@ module MDP
     # end
 
     # A more direct implementation
-    function withIndex{T}(compare::Function, x::AbstractArray{T,2})
+    function withIndex!{T}(val::AbstractArray{T,1}, idx::AbstractArray{Int,1}, compare::Function, x::AbstractArray{T,2})
         (n, m) = size(x)
-        idx = zeros(Int, n)
-        val = zeros(T,   n)
 
         for i=1:n
             idx[i], val[i] = 1, x[i,1]
@@ -201,7 +202,5 @@ module MDP
                 end
             end
         end
-
-        return (val, idx)
     end
 end
