@@ -7,7 +7,7 @@ module MDP
            finiteHorizon
 
 
-    abstract Model
+    abstract type Model end
 
     type ProbModel <: Model
         bellmanUpdate! :: Function
@@ -29,7 +29,7 @@ module MDP
             end
 
             is_square(Pi)          = size(Pi) == (n,n)
-            is_row_stochastic(Pi)  = maximum(abs(sum(Pi, 2) - 1)) < 100*eps(Float64)
+            is_row_stochastic(Pi)  = maximum(abs.(sum(Pi, 2) - 1)) < 100*eps(Float64)
             is_stopping_action(Pi) = Pi == zero(Pi)
             for Pi in P
                 if !is_square(Pi)
