@@ -16,6 +16,10 @@ module MDP
         stateSize  :: Int
         actionSize :: Int
 
+        P :: Array{ Matrix{Float64}, 1}
+        cost   :: Matrix{Float64}
+        reward :: Matrix{Float64}
+
         function ProbModel(c, P; objective=:Max) 
             (n, m) = size(c)
 
@@ -54,7 +58,7 @@ module MDP
                 # See Puterman Thm 6.6.6
                 contractionFactor = 1 - sum(minimum(P_concatenated, 1))
 
-                new(bellman!, obj, contractionFactor, n, m)
+                new(bellman!, obj, contractionFactor, n, m, P, c, c)
             end
         end
     end
