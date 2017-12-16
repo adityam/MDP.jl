@@ -48,8 +48,8 @@ Consider a Markov decision process where
 - **Actions** A = {1, 2}
 - **Rewards** r(s,a) given by 
 
-        r(1,1) = 5      r(1,2) = 10
-        r(2,1) = -1     r(2,2) = -Inf
+      r(1,1) = 5      r(1,2) = 10
+      r(2,1) = -1     r(2,2) = -Inf
 
     Note that `r(2,2) = -Inf` means that action 2 is infeasible at state 2.
 
@@ -65,33 +65,43 @@ This model is specified as follows:
 
 - Specify the rewards as a `S x A` matrix.
 
-        r = [ 5  10
-             -1  -Inf]
+    ```julia
+    r = [ 5  10
+         -1  -Inf]
+    ```
 
 - Specify the transition matrix as a list `{ P( . | ., 1), P( . | ., 2) }`.
 
-        P = Matrix[ [ 0.5  0.5 
-                      0.0  1.0 ],
-                    [ 0.0  1.0
-                      0.5  0.5 ] ]
+    ```julia
+    P = Matrix[ [ 0.5  0.5 
+                  0.0  1.0 ],
+                [ 0.0  1.0
+                  0.5  0.5 ] ]
+    ```
 
     This list may also be specified as a sparse matrix (this can lead to
     considerable speedup when the transition matrices are sparse)
 
-        P = SparseMatrixCSC[sparse([0.5 0.5; 0.0 1.0]),
-                            sparse([0.0 1.0; 0.5 0.5]) ]
+    ```
+    P = SparseMatrixCSC[sparse([0.5 0.5; 0.0 1.0]),
+                        sparse([0.0 1.0; 0.5 0.5]) ]
+    ```
 
 
 - Specify an MDP model
 
-        model = ProbModel(r, P; objective=:Max)
+    ```julia
+    model = ProbModel(r, P; objective=:Max)
+    ```
 
     `objective=:Max` specifies that we want to maximize reward. To minimize a
     cost function, use `objective=:Min`.
 
 To solve this model using value iteration use
 
-    (v,g) = valueIteration(model; discount=0.95)
+```julia
+(v,g) = valueIteration(model; discount=0.95)
+```
 
 `v` is the value function (stored as a `S` dimensional vector) nad `g` is the
 policy (again, stored as a `S` dimensional vector). 
@@ -113,22 +123,24 @@ The optimal arguments for `valueIteration` are
 
 Here is the full example:
 
-    using MDP
+```julia
+using MDP
 
-    P = Matrix[ [ 0.5  0.5 
-                  0.0  1.0 ],
-                [ 0.0  1.0
-                  0.5  0.5 ] ]
+P = Matrix[ [ 0.5  0.5 
+              0.0  1.0 ],
+            [ 0.0  1.0
+              0.5  0.5 ] ]
 
-    r = [ 5  10
-         -1  -Inf ]
+r = [ 5  10
+     -1  -Inf ]
 
-    model = ProbModel(r, P; objective=:Max)
+model = ProbModel(r, P; objective=:Max)
 
-    (v,g) = valueIteration(model; discount=0.95)
+(v,g) = valueIteration(model; discount=0.95)
 
-    println(g)
-    println(v)
+println(g)
+println(v)
+```
 
 
 which outputs
