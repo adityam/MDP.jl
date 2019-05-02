@@ -1,0 +1,13 @@
+name = "MDP"
+uuid = "000be557-5a19-5ee3-895e-d57ae9211b15"
+authors = ["Aditya Mahajan <adityam@umich.edu>"]
+version = "0.1.0"
+
+[deps]
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
