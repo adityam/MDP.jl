@@ -1,4 +1,5 @@
-using MDP
+using .MDP
+using Printf
 
 # Only needed for rle function
 using StatsBase
@@ -60,8 +61,8 @@ for c = [0.1 0.2 0.3 0.4 0.5]
         a1,b1 = rle(g1[1:end-1])
         a2,b2 = rle(g2[1:end-1])
 
-        k1 = (a1[1] == 1.0)?(b1[1]+1):1
-        k2 = (a2[1] == 1.0)?(b2[1]+1):1
+        k1 = (a1[1] == 1.0) ? (b1[1]+1) : 1
+        k2 = (a2[1] == 1.0) ? (b2[1]+1) : 1
 
         @printf("c=%0.2f\tp=%0.2f\t(%d,%d)\n", c,p, k1,k2)
   end

@@ -1,4 +1,5 @@
 using MDP
+using Printf
 
 # Only needed for rle function
 using StatsBase
@@ -46,8 +47,8 @@ function bellmanUpdate!(v_next, g_next, v; discount=1.0)
     #  m  = last time the state of channel was observed
     for m = 1:M+1, s = 1:2, ell = 1:L+2, k = 1:L+2
         next_m = min(m+1, M+1)
-        next_ell = (ell < L+1)? ell+1 : ell
-        next_k = (k < L+1)? k+1 : k
+        next_ell = (ell < L+1) ? ell+1 : ell
+        next_k = (k < L+1) ? k+1 : k
 
         q00 = discount * v[next_k, next_ell, s, next_m]
 
@@ -77,8 +78,7 @@ function bellmanUpdate!(v_next, g_next, v; discount=1.0)
               )
 
         next = [q00, q10, q01, q11]
-        idx = g_next[k, ell, s, m] = indmax(next)
-        v_next[k, ell, s, m] = next[ idx ]
+        v_next[k, ell, s, m],  g_next[k, ell, s, m] = findmax(next)
     end
 
     @printf("Debug: v[1,1,1,1] = %0.8f\n", v_next[1,1,1,1])
