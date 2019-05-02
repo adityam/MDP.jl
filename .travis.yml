@@ -5,6 +5,10 @@ os:
 julia:
   - 1.0
   - nightly
+
+script:
+  - julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate(); Pkg.test("MDP", coverage=true)'
+  
 matrix:
   allow_failures:
     - julia: nightly

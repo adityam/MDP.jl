@@ -1,5 +1,5 @@
 using MDP
-using Base.Test
+using Test
 
 include("./valueIteration.jl")
 include("./badmodels.jl")
