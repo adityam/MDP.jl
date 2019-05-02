@@ -7,9 +7,11 @@ module MDP
            finiteHorizon
 
 
+    using Printf
+
     abstract type Model end
 
-    type ProbModel <: Model
+    struct ProbModel <: Model
         bellmanUpdate! :: Function
         objective  :: Function
         contractionFactor :: Float64
@@ -33,7 +35,7 @@ module MDP
             end
 
             is_square(Pi)          = size(Pi) == (n,n)
-            is_row_stochastic(Pi)  = isapprox(sum(Pi, 2), ones(n); atol = 100*eps(Float64))
+            is_row_stochastic(Pi)  = isapprox(sum(Pi; dims=2), ones(n); atol = 100*eps(Float64))
             is_stopping_action(Pi) = Pi == zero(Pi)
             for Pi in P
                 if !is_square(Pi)
@@ -46,7 +48,7 @@ module MDP
             if objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
-                obj, compare = (objective == :Max)? (maximum, >) : (minimum, <)
+                obj, compare = (objective == :Max) ? (maximum, >) : (minimum, <)
 
                 function bellman!(vUpdated, gUpdated, v; discount=1)
                     Q = c + discount * reshape(P_concatenated * v, n, m);
@@ -56,14 +58,14 @@ module MDP
                 end
 
                 # See Puterman Thm 6.6.6
-                contractionFactor = 1 - sum(minimum(P_concatenated, 1))
+                contractionFactor = 1 - sum(minimum(P_concatenated; dims=1))
 
                 new(bellman!, obj, contractionFactor, n, m, P, c, c)
             end
         end
     end
 
-    type DynamicModel <: Model
+    struct DynamicModel <: Model
         bellmanUpdate! :: Function # (valueFunction; discount=1.0) -> (valueFunction, policy)
         objective  :: Function
         contractionFactor :: Float64
@@ -72,7 +74,7 @@ module MDP
             if objective != :Max && objective != :Min 
                 error("Model objective must be :Max or :Min")
             else
-                obj = (objective == :Max)? maximum : minimum
+                obj = (objective == :Max) ? maximum : minimum
                 new(bellmanUpdate!, obj, contractionFactor)
             end
         end
@@ -84,7 +86,7 @@ module MDP
                     iterations = 1_000,
                     tolerance  = 1e-4)
 
-        scaledDiscount  = (discount < 1)? (1-discount)/discount : 1
+        scaledDiscount  = (discount < 1) ? (1-discount)/discount : 1
         scaledTolerance = scaledDiscount * tolerance / 2
 
         update!(vUpdated, gUpdated, v) = m.bellmanUpdate!(vUpdated, gUpdated, v; discount=discount)
@@ -109,9 +111,9 @@ module MDP
                 iteration_bound = floor(Int, log( scaledTolerance/v_precision ) / log( m.contractionFactor*discount ))
             end
 
-            info("value iteration will converge in at most $iteration_bound iterations")
+            @info "value iteration will converge in at most $iteration_bound iterations" 
             if (iterations <= iteration_bound)
-                warn("Value iteration may not converge. Iterations $iterations less than estimated bound $iteration_bound")
+                @warn "Value iteration may not converge. Iterations $iterations less than estimated bound $iteration_bound"
             end 
         end
 
@@ -129,7 +131,7 @@ module MDP
             warn(@sprintf("Value iteration did not converge. 
                  Reached precision %e at iteration %d", 2*v_precision/scaledDiscount, iterationCount))
         else
-            info(@sprintf("Reached precision %e at iteration %d", 2*v_precision/scaledDiscount, iterationCount))
+            @info @sprintf("Reached precision %e at iteration %d", 2*v_precision/scaledDiscount, iterationCount)
         end
 
         # Renormalize v -- See Puterman 6.6.12 for details
@@ -153,6 +155,7 @@ module MDP
     end
 
     function finiteHorizon(m::Model, final_v;
+                           discount = 1.0,
                            horizon :: Int = 10)
 
         update!(vUpdated, gUpdated, v) = m.bellmanUpdate!(vUpdated, gUpdated, v; discount=discount)
@@ -160,7 +163,7 @@ module MDP
         v = [ zero(final_v) for stage = 1 : horizon ]
         g = [ zeros(Int,   size(final_v)) for stage = 1 : horizon ]
 
-        v[horizon] = copy(final_v)
+        update!(v[horizon], g[horizon], final_v)
         for stage in horizon-1: -1 : 1
           update!(v[stage], g[stage], v[stage+1])
         end
@@ -195,7 +198,7 @@ module MDP
     # end
 
     # A more direct implementation
-    function withIndex!{T}(val::AbstractArray{T,1}, idx::AbstractArray{Int,1}, compare::Function, x::AbstractArray{T,2})
+    function withIndex!(val::AbstractArray{T,1}, idx::AbstractArray{Int,1}, compare::Function, x::AbstractArray{T,2}) where T
         (n, m) = size(x)
 
         for i=1:n
