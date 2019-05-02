@@ -83,6 +83,7 @@ This model is specified as follows:
     considerable speedup when the transition matrices are sparse)
 
     ```
+    using SparseArrays
     P = SparseMatrixCSC[sparse([0.5 0.5; 0.0 1.0]),
                         sparse([0.0 1.0; 0.5 0.5]) ]
     ```
@@ -145,8 +146,8 @@ println(v)
 
 which outputs
 
+    [ Info: value iteration will converge in at most 20 iterations
+    [ Info: Reached precision 5.742009e-05 at iteration 18
+    [1, 1]
+    [-8.5714, -20.0]
 
-    INFO: value iteration will converge in at most 20 iterations
-    INFO: Reached precision 5.742009e-05 at iteration 18
-    [1,1]
-    [-8.571401228528563,-19.999971289954992]
