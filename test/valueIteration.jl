@@ -1,5 +1,6 @@
 using MDP
-using Base.Test
+using Test
+using SparseArrays
 
 # Puterman, Example 3.1
 
