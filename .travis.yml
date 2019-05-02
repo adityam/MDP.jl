@@ -8,6 +8,11 @@ julia:
 
 script:
   - julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate(); Pkg.test("MDP", coverage=true)'
+
+after_success:
+  - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
+
+coveralls: true
   
 matrix:
   allow_failures:
