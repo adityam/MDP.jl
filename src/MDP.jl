@@ -93,7 +93,7 @@ module MDP
 
         v_previous = copy(initial_v)
         v          = copy(initial_v)
-        g          = zeros(Int, size(v))
+        g          = zero(Int.(v))
         
         update!(v, g, initial_v)
         copy!(v_previous, v)

@@ -1,4 +1,4 @@
-using MDP
+using .MDP
 using Printf
 
 # Only needed for rle function
