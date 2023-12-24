@@ -161,7 +161,7 @@ module MDP
         update!(vUpdated, gUpdated, v) = m.bellmanUpdate!(vUpdated, gUpdated, v; discount=discount)
 
         v = [ zero(final_v) for stage = 1 : horizon ]
-        g = [ zeros(Int,   size(final_v)) for stage = 1 : horizon ]
+        g = [ zero(Int.(final_v)) for stage = 1 : horizon ]
 
         update!(v[horizon], g[horizon], final_v)
         for stage in horizon-1: -1 : 1
